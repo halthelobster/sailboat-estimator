@@ -905,6 +905,13 @@
   </div>
 </div>
 
+<div style="text-align:center;padding:20px 16px 8px">
+  <button onclick="exportScenario()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.3px">
+    📤 Export My Scenario
+  </button>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px">Saves a file you can send to Hal to pick up exactly where you left off</div>
+</div>
+
 <footer>
   Built from your real research: financial planner questions, cruiser cost data, boat preferences, and comparison analysis. Updated February 2026.
 </footer>
@@ -1750,5 +1757,99 @@ updateOtherAssets();
 selectBoat();
 update();
 </script>
+<script>
+function exportScenario() {
+  const d = compute();
+  const date = new Date().toISOString().split('T')[0];
+
+  const BOAT_LABELS = {
+    'ip-sp-cruiser': 'Island Packet SP Cruiser',
+    'ip-420': 'Island Packet 420',
+    'ip-440': 'Island Packet 440',
+    'leopard-40': 'Leopard 40',
+    'custom': 'Custom'
+  };
+  const MODE_LABELS = {
+    'marina': 'Marina Base',
+    'anchor': 'Anchor Base',
+    'coastal': 'Coastal Cruising',
+    'bluewater': 'Blue Water Passage'
+  };
+  const REGION_LABELS = {
+    'se-asia': 'Southeast Asia',
+    'med': 'Mediterranean (off-season)',
+    'caribbean': 'Caribbean',
+    'us': 'US / EU Coasts',
+    'pacific': 'Remote Pacific'
+  };
+
+  const boatLabel = BOAT_LABELS[state.boatSelection] || 'Custom';
+  const modeLabel = MODE_LABELS[state.lifestyleMode] || state.lifestyleMode;
+  const regionLabel = REGION_LABELS[state.region] || state.region;
+  const financing = state.paymentMethod === 'finance';
+
+  const md = `# Sailboat Financial Scenario
+*Exported: ${date}*
+
+## 🚢 The Boat
+- **Selection:** ${boatLabel}
+- **Purchase price:** $${state.boatPrice.toLocaleString()}
+- **All-in cost (with add-ons):** $${d.purchaseTotal.toLocaleString()}
+- **Payment method:** ${financing ? `Finance (${state.downPaymentPct}% down, ${state.loanInterestRate}% interest, ${state.loanTermYears}-year term)` : 'Pay cash'}
+${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTotal).toLocaleString()}
+- **Monthly loan payment:** $${d.monthlyLoanPayment.toLocaleString()}
+- **Total interest over loan term:** $${d.totalInterest.toLocaleString()}` : `- **Upfront (Day 1):** $${d.purchaseTotal.toLocaleString()}`}
+
+## 🌊 Lifestyle
+- **Mode:** ${modeLabel}
+- **Primary region:** ${regionLabel}
+- **Monthly burn:** $${d.monthlyTotal.toLocaleString()}
+- **Annual burn:** $${(d.monthlyTotal * 12).toLocaleString()}
+
+## 💼 Income
+- **Annual gross income:** $${state.annualIncome.toLocaleString()}
+- **Recurring/retainer %:** ${state.recurringPct}%
+- **Recurring monthly income:** $${Math.round(state.annualIncome * state.recurringPct / 100 / 12).toLocaleString()}
+- **Project/variable monthly income:** $${Math.round(state.annualIncome * (100 - state.recurringPct) / 100 / 12).toLocaleString()}
+- **Top client concentration:** ${state.topClientPct}%
+- **Effective tax rate:** ${state.taxRate}%
+- **Gross income required to cruise:** $${d.grossIncomeRequired.toLocaleString()}
+
+## 🏦 Balance Sheet
+- **Liquid savings:** $${(state.liquidSavings || 0).toLocaleString()}
+- **Taxable brokerage:** $${(state.brokerageSavings || 0).toLocaleString()}
+- **IRA / Roth IRA:** $${(state.iraSavings || 0).toLocaleString()} (net after penalties: $${Math.round((state.iraSavings || 0) * 0.675).toLocaleString()})
+- **401k / retirement (excluded):** $${(state.retirement401k || 0).toLocaleString()}
+- **Available for purchase:** $${d.availableForPurchase.toLocaleString()}
+- **Monthly savings rate:** $${state.monthlySavingsRate.toLocaleString()}
+
+## 🎯 Readiness
+- **Savings target:** $${d.savingsTarget.toLocaleString()}
+- **Savings gap:** $${Math.max(0, d.savingsTarget - d.availableForPurchase).toLocaleString()}
+- **Months to financially ready:** ${d.months === 0 ? 'Ready now' : d.months === Infinity ? 'Need savings rate' : d.months + ' months'}
+- **Target ready date:** ${d.months === 0 ? 'Now' : d.months === Infinity ? 'Unknown' : (() => { const t = new Date(2026, 1, 1); t.setMonth(t.getMonth() + d.months); return t.toLocaleDateString('en-US', {month:'long', year:'numeric'}); })()}
+
+## 📊 Key Signals
+- **Recurring income covers cruising budget:** ${Math.round(state.annualIncome * state.recurringPct / 100 / 12) >= d.monthlyTotal ? '✅ Yes' : '❌ No'}
+- **Client concentration risk:** ${state.topClientPct < 40 ? '✅ Well diversified' : state.topClientPct < 60 ? '⚠️ Moderate' : '❌ High risk'}
+- **50% income drop runway:** ${Math.round((d.availableForPurchase) / (d.monthlyTotal / 2))} months
+
+---
+*To resume this scenario: share this file with Hal and say "load my sailboat scenario"*
+
+\`\`\`json
+${JSON.stringify(state, null, 2)}
+\`\`\`
+`;
+
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sailboat-scenario-${date}.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+
 </body>
 </html>
