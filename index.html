@@ -1942,8 +1942,17 @@ ${JSON.stringify(state, null, 2)}
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `sailboat-scenario-${date}.md`;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  // Visual confirmation
+  const btn = document.querySelector('[onclick="exportScenario()"]');
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Saved to Downloads!';
+    btn.style.background = '#2ecc71';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 3000);
+  }
 }
 </script>
 
