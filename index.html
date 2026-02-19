@@ -231,6 +231,7 @@
 <div class="bar">
   <div class="bar-item"><div class="lbl">All-In Cost</div><div class="val" id="s-purchase">—</div></div>
   <div class="bar-item"><div class="lbl">Monthly Burn</div><div class="val" id="s-monthly">—</div></div>
+  <div class="bar-item"><div class="lbl">Gross Income Needed</div><div class="val" id="s-gross">—</div></div>
   <div class="bar-item"><div class="lbl">Months to Ready</div><div class="val" id="s-timeline">—</div></div>
   <div class="bar-item"><div class="lbl">Recurring Coverage</div><div class="val" id="s-recurring">—</div></div>
 </div>
@@ -260,7 +261,86 @@
             <input class="num-input" id="boat-i" value="$225,000">
           </div>
         </div>
-        <div class="section" style="margin-top:12px;color:var(--muted)">Add-On Costs (toggle to include)</div>
+        
+        <div class="div"></div>
+        <div class="section" style="color:var(--accent)">Finance vs Cash</div>
+        <div class="tabs" style="margin-bottom:14px">
+          <button class="tab on" onclick="setPaymentMethod('cash')">💰 Pay Cash</button>
+          <button class="tab" onclick="setPaymentMethod('finance')">🏦 Finance</button>
+        </div>
+        
+        <div id="financing-inputs" style="display:none">
+          <div class="field">
+            <label>Down Payment</label>
+            <div class="slider-row">
+              <input type="range" id="down-r" min="10" max="50" step="5" value="20">
+              <span class="num-input" style="width:60px" id="down-i">20%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Interest Rate (current marine loan rates)</label>
+            <div class="slider-row">
+              <input type="range" id="rate-interest-r" min="4" max="15" step="0.25" value="7.5">
+              <span class="num-input" style="width:70px" id="rate-interest-i">7.5%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Loan Term</label>
+            <select id="loan-term" onchange="state.loanTermYears=parseInt(this.value);update()">
+              <option value="10">10 years</option>
+              <option value="15" selected>15 years</option>
+              <option value="20">20 years</option>
+            </select>
+          </div>
+        </div>
+        
+        <div id="finance-comparison" style="display:none;margin-top:16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div class="split-item">
+              <h4>💰 Pay Cash</h4>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between"><span>Savings needed:</span><span id="cash-savings-needed">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Monthly burn:</span><span id="cash-monthly-burn">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Months to ready:</span><span id="cash-months-ready">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Total boat cost:</span><span id="cash-total-cost">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Total interest:</span><span style="color:var(--green)">$0</span></div>
+              </div>
+            </div>
+            <div class="split-item">
+              <h4>🏦 Finance</h4>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between"><span>Savings needed:</span><span id="finance-savings-needed">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Monthly burn:</span><span id="finance-monthly-burn">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Months to ready:</span><span id="finance-months-ready">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Total boat cost:</span><span id="finance-total-cost">—</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Total interest:</span><span id="finance-interest-paid" style="color:var(--amber)">—</span></div>
+              </div>
+              <div style="background:rgba(59,157,232,0.1);border-radius:6px;padding:8px;margin-top:8px">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Monthly loan payment</div>
+                <div style="font-size:16px;font-weight:700;color:var(--accent)" id="monthly-payment">—</div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="finance-insight" style="background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center">
+            <div style="font-size:13px;font-weight:600;color:var(--amber)" id="insight-text">—</div>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;margin-bottom:12px">
+            <div style="font-size:11px;color:var(--muted);line-height:1.4">
+              <strong>💡 Opportunity cost:</strong> Cash tied up in the boat can't be invested. At 7% market return, $200k invested over 10 years = $393k. Factor this into your decision.
+            </div>
+          </div>
+          
+          <div style="background:rgba(59,157,232,0.07);border:1px solid rgba(59,157,232,0.2);border-radius:8px;padding:12px">
+            <div style="font-size:12px;color:var(--text);line-height:1.4">
+              <strong>🎯 Guidance:</strong> Finance if you have enough for down payment + expenses + emergency fund, and the monthly payment is covered by recurring income alone. Pay cash if you have the full amount AND keeping the loan payment would make your recurring income insufficient to sustain the lifestyle. The real question is not "can I afford the payment" but "which path gets me on the water sooner with a sustainable income structure."
+            </div>
+          </div>
+        </div>
+        
+        <div class="div"></div>
+        <div class="section" style="color:var(--muted)">Add-On Costs (toggle to include)</div>
         <div id="addon-list"></div>
         <div class="div"></div>
         <div style="display:flex;justify-content:space-between;align-items:baseline">
@@ -302,6 +382,30 @@
         </div>
         
         <div class="div"></div>
+        <div class="field">
+          <label>Effective Tax Rate (US citizen, worldwide income)</label>
+          <div class="slider-row">
+            <input type="range" id="tax-r" min="15" max="50" step="1" value="38">
+            <span class="num-input" style="width:60px" id="tax-i">38%</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            Federal (~22-24%) + self-employment tax net (~8%) + state. Self-employed consultant estimate.
+          </div>
+        </div>
+
+        <div style="background:rgba(59,157,232,0.07);border:1px solid rgba(59,157,232,0.2);border-radius:8px;padding:12px;margin-top:12px;">
+          <h4 style="font-size:12px;color:var(--accent);margin-bottom:8px;font-weight:600;">💡 Tax Planning Notes</h4>
+          <div style="font-size:11px;color:var(--muted);line-height:1.4;">
+            <div style="margin-bottom:6px;">
+              <strong>FEIE (Foreign Earned Income Exclusion):</strong> If qualifying (330+ days outside US), can exclude ~$126,500 from federal tax. Could reduce effective rate significantly.
+            </div>
+            <div>
+              <strong>California Residency:</strong> CA attempts to tax former residents on worldwide income. Formal domicile severance needed before departure.
+            </div>
+          </div>
+        </div>
+        
+        <div class="div"></div>
         <div class="split">
           <div class="split-item">
             <h4>Recurring Income</h4>
@@ -322,7 +426,7 @@
             <span id="drop-income">—</span>
           </div>
           <div class="scenario-row">
-            <span>Monthly runway available:</span>
+            <span>Monthly runway (after tax + expenses):</span>
             <span id="runway-months">—</span>
           </div>
         </div>
@@ -417,6 +521,10 @@
             <input type="checkbox" id="life-parents" onchange="updateSkills()">
             <label for="life-parents">Parents situation stable</label>
           </div>
+          <div class="skill-check">
+            <input type="checkbox" id="life-ca-domicile" onchange="updateSkills()">
+            <label for="life-ca-domicile">CA domicile severance completed (if applicable)</label>
+          </div>
         </div>
 
         <div class="div"></div>
@@ -441,7 +549,7 @@
         <div class="tbox-item">
           <div class="tlbl">Annual Income Required</div>
           <div class="tval" id="tl-req">—</div>
-          <div class="tsub">cruising budget + 30% buffer</div>
+          <div class="tsub">gross income (pre-tax)</div>
         </div>
         <div class="tbox-item">
           <div class="tlbl">Income Surplus/Deficit</div>
@@ -484,6 +592,11 @@ const state = {
   recurringPct: 60,
   savings: 200000,
   rate: 15000,
+  taxRate: 38,
+  paymentMethod: 'cash',
+  downPaymentPct: 20,
+  interestRate: 7.5,
+  loanTermYears: 15,
 };
 
 // Jordan's specific boat options with actual price ranges from research
@@ -605,30 +718,37 @@ function compute() {
   const gap = Math.max(0, target - state.savings);
   const months = state.rate > 0 ? Math.ceil(gap / state.rate) : (gap > 0 ? Infinity : 0);
 
-  const incomeReq = Math.round(annualBudget * 1.3);
+  // Tax calculations - US citizens pay on worldwide income
+  const netRequired = Math.round(annualBudget * 1.3); // Net needed after tax (cruising + 30% buffer)
+  const grossRequired = Math.round(netRequired / (1 - state.taxRate / 100)); // Gross needed before tax
+  
   const recurringAmt = Math.round(state.income * state.recurringPct / 100);
   const projectAmt = state.income - recurringAmt;
   
-  // 50% income drop scenario
+  // 50% income drop scenario (after tax)
   const dropIncome = Math.round(state.income * 0.5);
-  const runwayMonths = dropIncome > 0 ? Math.floor(state.savings / (monthlyTotal || 1)) : 0;
+  const dropIncomeAfterTax = dropIncome * (1 - state.taxRate / 100);
+  const dropIncomeMonthly = dropIncomeAfterTax / 12;
+  const netBurn = Math.max(0, monthlyTotal - dropIncomeMonthly);
+  const runwayMonths = netBurn > 0 ? Math.floor(state.savings / netBurn) : 999;
   
-  // Financial checks
-  const incomeOk = state.income >= incomeReq;
+  // Financial checks - use GROSS income requirement
+  const incomeOk = state.income >= grossRequired;
   const boatRatio = state.boatPrice / (state.income || 1);
   const boatOk = boatRatio <= 3.5;
   const coversPurchase = state.savings >= purchaseTotal;
   const coversEmergency = state.savings >= purchaseTotal + emergencyFund;
   
-  // Recurring income coverage
-  const recurringCoverage = monthlyTotal > 0 ? (recurringAmt / 12) / monthlyTotal : 0;
-  const runway6mo = dropIncome / 12 >= monthlyTotal * 6;
+  // Recurring income coverage (after tax)
+  const recurringAfterTax = recurringAmt * (1 - state.taxRate / 100);
+  const recurringCoverage = monthlyTotal > 0 ? (recurringAfterTax / 12) / monthlyTotal : 0;
+  const runway6mo = dropIncomeMonthly >= monthlyTotal || runwayMonths >= 6;
 
   return {
     addonTotal, purchaseTotal,
     monthly, monthlyTotal, annualBudget,
     emergencyFund, ohShit, target, gap, months,
-    incomeReq, incomeOk, boatRatio, boatOk,
+    netRequired, grossRequired, incomeOk, boatRatio, boatOk,
     coversPurchase, coversEmergency,
     recurringAmt, projectAmt, dropIncome, runwayMonths,
     recurringCoverage, runway6mo
@@ -693,6 +813,7 @@ function update() {
   // Summary bar
   document.getElementById('s-purchase').textContent = fmt(d.purchaseTotal);
   document.getElementById('s-monthly').textContent = fmt(d.monthlyTotal);
+  document.getElementById('s-gross').textContent = fmt(d.grossRequired);
   
   const tEl = document.getElementById('s-timeline');
   if (d.months === 0) { tEl.textContent = 'Ready!'; tEl.className = 'val g'; }
@@ -752,14 +873,14 @@ function update() {
   if (d.gap <= 0) { gapEl.textContent = '✓ Target met!'; gapEl.style.color = 'var(--green)'; }
   else { gapEl.textContent = fmtFull(d.gap) + ' gap'; gapEl.style.color = 'var(--amber)'; }
 
-  // Financial checks
+  // Financial checks - use gross requirements
   const checks = [
     {
-      ok: d.incomeOk, warn: state.income >= d.annualBudget && !d.incomeOk,
-      title: 'Income covers cruising costs + 30% buffer',
+      ok: d.incomeOk, warn: state.income >= d.netRequired && !d.incomeOk,
+      title: 'Gross income covers cruising costs + buffer + taxes',
       detail: d.incomeOk
-        ? `✓ Your ${fmtFull(state.income)}/yr exceeds the ${fmtFull(d.incomeReq)}/yr requirement`
-        : `Need ${fmtFull(d.incomeReq)}/yr — you're ${fmtFull(d.incomeReq - state.income)} short`,
+        ? `✓ Your ${fmtFull(state.income)}/yr exceeds ${fmtFull(d.grossRequired)}/yr gross requirement (${fmtFull(d.netRequired)} net + ${state.taxRate}% tax)`
+        : `Need ${fmtFull(d.grossRequired)}/yr gross (${fmtFull(d.netRequired)} net + ${state.taxRate}% tax) — you're ${fmtFull(d.grossRequired - state.income)} short`,
     },
     {
       ok: d.boatOk, warn: d.boatRatio > 3.5 && d.boatRatio <= 5,
@@ -784,13 +905,13 @@ function update() {
     },
     {
       ok: d.recurringCoverage >= 1.0, warn: d.recurringCoverage >= 0.8,
-      title: 'Recurring income alone covers cruising budget',
-      detail: `${Math.round(d.recurringCoverage*100)}% coverage — ${fmtFull(d.recurringAmt/12)}/mo recurring vs ${fmtFull(d.monthlyTotal)}/mo needed`,
+      title: 'Recurring income alone covers cruising budget (after tax)',
+      detail: `${Math.round(d.recurringCoverage*100)}% coverage — ${fmtFull(d.recurringAmt/12)}/mo recurring × ${100-state.taxRate}% after tax = ${fmtFull((d.recurringAmt * (1-state.taxRate/100))/12)}/mo vs ${fmtFull(d.monthlyTotal)}/mo needed`,
     },
     {
       ok: d.runway6mo, warn: d.runwayMonths >= 3,
       title: '6+ month runway if income drops 50%',
-      detail: `At 50% income (${fmtFull(d.dropIncome)}/yr), you'd have ${d.runwayMonths} months runway`,
+      detail: `At 50% income (${fmtFull(d.dropIncome)}/yr gross), you'd have ${d.runwayMonths} months runway using savings`,
     }
   ];
   
@@ -817,13 +938,13 @@ function update() {
     document.getElementById('tl-target').textContent = then.toLocaleDateString('en-US',{month:'short',year:'numeric'});
   }
   
-  document.getElementById('tl-req').textContent = fmtFull(d.incomeReq);
-  const incDelta = state.income - d.incomeReq;
+  document.getElementById('tl-req').textContent = fmtFull(d.grossRequired);
+  const incDelta = state.income - d.grossRequired;
   const tld = document.getElementById('tl-delta');
   tld.textContent = (incDelta >= 0 ? '+' : '') + fmtFull(incDelta);
   tld.style.color = incDelta >= 0 ? 'var(--green)' : 'var(--red)';
   
-  const recReq = Math.round((d.monthlyTotal * 12) / (state.income || 1) * 100);
+  const recReq = Math.round((d.grossRequired) / (state.income || 1) * 100);
   document.getElementById('tl-recurring').textContent = recReq + '%';
 }
 
@@ -834,6 +955,7 @@ bindSlider('income-r', 'income-i', 'income', 100000, 2000000);
 bindSlider('recurring-r', 'recurring-i', 'recurringPct', 0, 100);
 bindSlider('savings-r', 'savings-i', 'savings', 0, 2000000);
 bindSlider('rate-r', 'rate-i', 'rate', 0, 50000);
+bindSlider('tax-r', 'tax-i', 'taxRate', 15, 50);
 
 // Set initial boat selection
 selectBoat();
