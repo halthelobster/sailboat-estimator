@@ -208,6 +208,110 @@
   .tbox-item .tval { font-size: 18px; font-weight: 700; color: var(--accent); }
   .tbox-item .tsub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
+  /* COLLAPSIBLE SECTIONS */
+  .collapsible {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+  }
+  .collapsible-header:hover { background: rgba(255,255,255,0.03); }
+  .collapsible-content {
+    padding: 0 18px 18px;
+    display: none;
+  }
+  .collapsible-content.open { display: block; }
+  .collapsible-icon {
+    transition: transform 0.2s;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .collapsible-icon.open { transform: rotate(180deg); }
+
+  /* BALANCE SHEET */
+  .balance-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .balance-item h4 {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .balance-note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* WARNINGS */
+  .warning {
+    background: rgba(224,85,85,0.07);
+    border: 1px solid rgba(224,85,85,0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+  }
+  .warning.moderate {
+    background: rgba(240,165,0,0.07);
+    border-color: rgba(240,165,0,0.2);
+  }
+  .warning.low {
+    background: rgba(46,204,113,0.07);
+    border-color: rgba(46,204,113,0.2);
+  }
+
+  /* CONCENTRATION RISK */
+  .concentration-warning {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  /* SF COST OFFSET */
+  .sf-offset {
+    background: rgba(59,157,232,0.07);
+    border: 1px solid rgba(59,157,232,0.2);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .sf-offset h4 {
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* REVERSE CALCULATOR */
+  .reverse-calc {
+    background: rgba(240,165,0,0.07);
+    border: 1px solid rgba(240,165,0,0.2);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .reverse-calc h4 {
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
   footer { text-align: center; padding: 20px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
   
   @media(max-width: 680px) {
@@ -339,6 +443,40 @@
           </div>
         </div>
         
+        <!-- FEATURE 6: Boat Resale Value -->
+        <div class="collapsible">
+          <div class="collapsible-header" onclick="toggleCollapsible('resale')">
+            <span style="font-size:12px;color:var(--accent);font-weight:600">🔄 Boat Resale Value & True Net Cost</span>
+            <span class="collapsible-icon" id="resale-icon">▼</span>
+          </div>
+          <div class="collapsible-content" id="resale-content">
+            <div class="field">
+              <label>Years before selling</label>
+              <div class="slider-row">
+                <input type="range" id="years-selling-r" min="3" max="20" step="1" value="7" oninput="updateYearsSelling()">
+                <span class="num-input" style="width:60px" id="years-selling-i">7</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Value retention rate (% after 10 years)</label>
+              <div class="slider-row">
+                <input type="range" id="retention-rate-r" min="50" max="90" step="1" value="72" oninput="updateRetentionRate()">
+                <span class="num-input" style="width:60px" id="retention-rate-i">72%</span>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                IP boats: 72% (hold value well), Leopard 40: 60%, Custom: adjustable
+              </div>
+            </div>
+            <div class="div"></div>
+            <div class="trow"><span class="tc">Estimated resale value in <span id="resale-years">7</span> years</span><span class="tv" id="resale-value">—</span></div>
+            <div class="trow"><span class="tc">Net cost of boat ownership</span><span class="tv" id="net-boat-cost">—</span></div>
+            <div class="trow"><span class="tc">Annualized true boat cost</span><span class="tv" id="annualized-cost">—</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">
+              Compare to rent: $3,200/mo × 12 × <span id="rent-years">7</span> years = <span id="rent-comparison">—</span> in rent with nothing to show
+            </div>
+          </div>
+        </div>
+        
         <div class="div"></div>
         <div class="section" style="color:var(--muted)">Add-On Costs (toggle to include)</div>
         <div id="addon-list"></div>
@@ -352,6 +490,9 @@
       <!-- Your Numbers -->
       <div class="card">
         <div class="section">Section 3: Your Numbers</div>
+        
+        <!-- FEATURE 4: Client Concentration Risk -->
+        <div class="section" style="color:var(--muted);font-size:12px;margin-bottom:12px">Income Structure</div>
         <div class="field">
           <label>Annual Income</label>
           <div class="slider-row">
@@ -367,12 +508,81 @@
           </div>
         </div>
         <div class="field">
-          <label>Current Savings</label>
+          <label>% of income from your top client</label>
           <div class="slider-row">
-            <input type="range" id="savings-r" min="0" max="2000000" step="10000" value="200000">
-            <input class="num-input" id="savings-i" value="$200,000">
+            <input type="range" id="concentration-r" min="0" max="100" step="5" value="60" oninput="updateConcentration()">
+            <span class="num-input" style="width:60px" id="concentration-i">60%</span>
+          </div>
+          <div id="concentration-warning" class="concentration-warning">
+            <!-- Populated by JavaScript -->
           </div>
         </div>
+        
+        <div class="div"></div>
+        
+        <!-- FEATURE 1: Personal Balance Sheet -->
+        <div class="section" style="color:var(--muted);font-size:12px;margin-bottom:12px">Personal Balance Sheet</div>
+        
+        <div class="balance-item">
+          <h4>💰 Liquid Savings (checking, money market)</h4>
+          <div class="slider-row">
+            <input type="range" id="liquid-r" min="0" max="500000" step="5000" value="50000" oninput="updateLiquid()">
+            <input class="num-input" id="liquid-i" value="$50,000">
+          </div>
+          <div class="balance-note">Fully counts toward purchase</div>
+        </div>
+        
+        <div class="balance-item">
+          <h4>📈 Taxable Brokerage</h4>
+          <div class="slider-row">
+            <input type="range" id="brokerage-r" min="0" max="500000" step="5000" value="50000" oninput="updateBrokerage()">
+            <input class="num-input" id="brokerage-i" value="$50,000">
+          </div>
+          <div class="balance-note">Counts toward purchase (may have capital gains tax on withdrawal)</div>
+        </div>
+        
+        <div class="balance-item">
+          <h4>🚨 IRA / Roth IRA — Emergency backstop only</h4>
+          <div class="slider-row">
+            <input type="range" id="ira-r" min="0" max="500000" step="5000" value="50000" oninput="updateIRA()">
+            <input class="num-input" id="ira-i" value="$50,000">
+          </div>
+          <div class="balance-note">After 10% penalty + 25% income tax = nets ~$65 on every $100</div>
+          <div class="balance-note" style="color:var(--amber);margin-top:4px">IRA net value if accessed early: <span id="ira-net">—</span></div>
+        </div>
+        
+        <div class="balance-item">
+          <h4>🛡️ 401k / Other Retirement — Don't count this</h4>
+          <div class="slider-row">
+            <input type="range" id="retirement-r" min="0" max="1000000" step="10000" value="0" oninput="updateRetirement()">
+            <input class="num-input" id="retirement-i" value="$0">
+          </div>
+          <div class="balance-note">Purely for context — protected retirement funds</div>
+        </div>
+        
+        <div class="balance-item">
+          <h4>🚗 Other Assets (car, etc.)</h4>
+          <div class="slider-row">
+            <input type="range" id="other-assets-r" min="0" max="200000" step="5000" value="0" oninput="updateOtherAssets()">
+            <input class="num-input" id="other-assets-i" value="$0">
+          </div>
+          <div class="balance-note">Additional liquid assets you could sell if needed</div>
+        </div>
+        
+        <div class="div"></div>
+        <div class="split">
+          <div class="split-item">
+            <h4>Available for Purchase</h4>
+            <div class="split-value" style="color:var(--green)" id="available-purchase">—</div>
+            <div class="split-sub">Liquid + Brokerage</div>
+          </div>
+          <div class="split-item">
+            <h4>Emergency Backstop</h4>
+            <div class="split-value" style="color:var(--amber)" id="emergency-backstop">—</div>
+            <div class="split-sub">IRA net after penalties</div>
+          </div>
+        </div>
+        
         <div class="field">
           <label>Monthly Savings Rate</label>
           <div class="slider-row">
@@ -430,6 +640,18 @@
             <span id="runway-months">—</span>
           </div>
         </div>
+        
+        <div id="concentration-scenario" class="scenario" style="display:none;">
+          <h4>⚠️ "Top Client Leaves" Scenario</h4>
+          <div class="scenario-row">
+            <span>Monthly income drops to:</span>
+            <span id="post-client-loss-income">—</span>
+          </div>
+          <div class="scenario-row">
+            <span>Runway with remaining income:</span>
+            <span id="client-loss-runway">—</span>
+          </div>
+        </div>
 
         <div class="div"></div>
         <div class="section" style="color:var(--muted)">Savings Target Breakdown</div>
@@ -476,6 +698,39 @@
         <div class="btotal" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1)">
           <span class="bl">Annual Total</span>
           <span class="bv" id="annual-total" style="font-size:16px">—</span>
+        </div>
+        
+        <!-- FEATURE 5: SF Cost Offset -->
+        <div class="sf-offset">
+          <h4>🌁 What you're escaping (SF costs)</h4>
+          <div class="field">
+            <label>Current rent/mortgage</label>
+            <div class="slider-row">
+              <input type="range" id="sf-rent-r" min="2000" max="8000" step="100" value="3200" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-rent-i" value="$3,200" style="width:80px">
+            </div>
+          </div>
+          <div class="field">
+            <label>Car payment + insurance + gas</label>
+            <div class="slider-row">
+              <input type="range" id="sf-car-r" min="300" max="1500" step="50" value="800" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-car-i" value="$800" style="width:80px">
+            </div>
+          </div>
+          <div class="field">
+            <label>CA state income tax rate</label>
+            <div class="slider-row">
+              <input type="range" id="ca-tax-r" min="0" max="15" step="0.1" value="9.3" oninput="updateSFCosts()">
+              <span class="num-input" style="width:70px" id="ca-tax-i">9.3%</span>
+            </div>
+          </div>
+          <div class="div"></div>
+          <div class="trow"><span class="tc">Monthly costs eliminated</span><span class="tv" id="sf-costs-eliminated">—</span></div>
+          <div class="trow"><span class="tc">Annual CA tax savings (monthly)</span><span class="tv" id="ca-tax-savings">—</span></div>
+          <div class="trow total"><span class="tc">Total monthly costs eliminated</span><span class="tv" id="total-sf-eliminated">—</span></div>
+          <div style="text-align:center;margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:6px;">
+            <div style="font-size:13px;font-weight:600;color:var(--accent)" id="net-lifestyle-cost">—</div>
+          </div>
         </div>
       </div>
 
@@ -527,6 +782,54 @@
           </div>
         </div>
 
+        <!-- FEATURE 2: Exit / Return Cost Scenario -->
+        <div class="collapsible">
+          <div class="collapsible-header" onclick="toggleCollapsible('exit')">
+            <span style="font-size:12px;color:var(--accent);font-weight:600">🏠 What does coming back cost?</span>
+            <span class="collapsible-icon" id="exit-icon">▼</span>
+          </div>
+          <div class="collapsible-content" id="exit-content">
+            <div class="field">
+              <label>Boat sale estimate</label>
+              <div class="slider-row">
+                <input type="range" id="boat-sale-r" min="100000" max="400000" step="5000" value="157500" oninput="updateExitScenario()">
+                <input class="num-input" id="boat-sale-i" value="$157,500">
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                Default: boat price × 70% (IPs hold value well)
+              </div>
+            </div>
+            <div class="field">
+              <label>Months of transition expenses</label>
+              <div class="slider-row">
+                <input type="range" id="transition-months-r" min="1" max="12" step="1" value="3" oninput="updateExitScenario()">
+                <span class="num-input" style="width:60px" id="transition-months-i">3</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>First/last/deposit on new apartment</label>
+              <div class="slider-row">
+                <input type="range" id="apartment-cost-r" min="3000" max="20000" step="500" value="8000" oninput="updateExitScenario()">
+                <input class="num-input" id="apartment-cost-i" value="$8,000">
+              </div>
+            </div>
+            <div class="field">
+              <label>Flights home</label>
+              <div class="slider-row">
+                <input type="range" id="flights-cost-r" min="500" max="10000" step="250" value="2000" oninput="updateExitScenario()">
+                <input class="num-input" id="flights-cost-i" value="$2,000">
+              </div>
+            </div>
+            <div class="div"></div>
+            <div class="trow"><span class="tc">Net from boat sale</span><span class="tv" id="net-boat-sale">—</span></div>
+            <div class="trow"><span class="tc">Total re-entry cost</span><span class="tv" id="reentry-cost">—</span></div>
+            <div class="trow total" id="net-exit-row"><span class="tc">Net exit position</span><span class="tv" id="net-exit-position">—</span></div>
+            <div style="text-align:center;margin-top:12px;padding:12px;border-radius:8px" id="exit-summary">
+              <div style="font-size:13px;font-weight:600" id="exit-message">—</div>
+            </div>
+          </div>
+        </div>
+
         <div class="div"></div>
         <div id="financial-checks"></div>
       </div>
@@ -535,6 +838,39 @@
     <!-- FULL WIDTH: Timeline -->
     <div class="card full">
       <div class="section">Section 5: Timeline & Summary</div>
+      
+      <!-- FEATURE 3: Reverse Calculator -->
+      <div class="reverse-calc">
+        <h4>🎯 "Leave By" Reverse Calculator</h4>
+        <div class="field">
+          <label>Target departure year</label>
+          <select id="target-year" onchange="updateReverseCalculator()">
+            <option value="2026">2026</option>
+            <option value="2027" selected>2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">MONTHS REMAINING</div>
+            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-months-remaining">—</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">REQUIRED SAVINGS/MONTH</div>
+            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-required-savings">—</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px;padding:10px;border-radius:6px" id="reverse-feasibility">
+          <div style="font-size:12px;font-weight:600" id="reverse-message">—</div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">
+          At your current rate of <span id="current-savings-rate">—</span>/mo, you'll be ready in <span id="current-ready-date">—</span>
+        </div>
+      </div>
+      
       <div class="tbox">
         <div class="tbox-item">
           <div class="tlbl">Months to Financially Ready</div>
@@ -590,22 +926,43 @@ const state = {
   region: 'caribbean',
   income: 500000,
   recurringPct: 60,
-  savings: 200000,
+  // FEATURE 1: Balance Sheet
+  liquidSavings: 50000,
+  brokerage: 50000,
+  ira: 50000,
+  retirement: 0,
+  otherAssets: 0,
   rate: 15000,
   taxRate: 38,
   paymentMethod: 'cash',
   downPaymentPct: 20,
   interestRate: 7.5,
   loanTermYears: 15,
+  // FEATURE 4: Concentration Risk
+  concentrationPct: 60,
+  // FEATURE 5: SF Cost Offset
+  sfRent: 3200,
+  sfCar: 800,
+  caTaxRate: 9.3,
+  // FEATURE 6: Resale Value
+  yearsSelling: 7,
+  retentionRate: 72,
+  // FEATURE 2: Exit Scenario
+  boatSaleEstimate: 157500,
+  transitionMonths: 3,
+  apartmentCost: 8000,
+  flightsCost: 2000,
+  // FEATURE 3: Reverse Calculator
+  targetYear: 2027,
 };
 
 // Jordan's specific boat options with actual price ranges from research
 const BOATS = {
-  'sp-cruiser': { min: 199000, max: 254000, name: 'Island Packet SP Cruiser' },
-  'ip420':      { min: 180000, max: 280000, name: 'Island Packet 420' },
-  'ip440':      { min: 250000, max: 380000, name: 'Island Packet 440' },
-  'leopard40':  { min: 200000, max: 350000, name: 'Leopard 40' },
-  'custom':     { min: 150000, max: 400000, name: 'Custom' },
+  'sp-cruiser': { min: 199000, max: 254000, name: 'Island Packet SP Cruiser', retention: 72 },
+  'ip420':      { min: 180000, max: 280000, name: 'Island Packet 420', retention: 72 },
+  'ip440':      { min: 250000, max: 380000, name: 'Island Packet 440', retention: 72 },
+  'leopard40':  { min: 200000, max: 350000, name: 'Leopard 40', retention: 60 },
+  'custom':     { min: 150000, max: 400000, name: 'Custom', retention: 65 },
 };
 
 // Jordan's actual lifestyle modes from the planner, not generic budget/comfortable/luxury
@@ -678,14 +1035,157 @@ function selectBoat() {
   slider.value = midpoint;
   state.boatPrice = midpoint;
   
+  // Update retention rate for boat type
+  state.retentionRate = range.retention;
+  document.getElementById('retention-rate-r').value = state.retentionRate;
+  document.getElementById('retention-rate-i').textContent = state.retentionRate + '%';
+  
+  // Update default boat sale estimate
+  state.boatSaleEstimate = Math.round(midpoint * 0.7);
+  document.getElementById('boat-sale-r').value = state.boatSaleEstimate;
+  document.getElementById('boat-sale-i').value = fmtFull(state.boatSaleEstimate);
+  
   document.getElementById('boat-i').value = fmtFull(midpoint);
   update();
+}
+
+// FEATURE 1: Balance Sheet Updates
+function updateLiquid() {
+  const val = parseInt(document.getElementById('liquid-r').value);
+  state.liquidSavings = val;
+  document.getElementById('liquid-i').value = fmtFull(val);
+  update();
+}
+
+function updateBrokerage() {
+  const val = parseInt(document.getElementById('brokerage-r').value);
+  state.brokerage = val;
+  document.getElementById('brokerage-i').value = fmtFull(val);
+  update();
+}
+
+function updateIRA() {
+  const val = parseInt(document.getElementById('ira-r').value);
+  state.ira = val;
+  document.getElementById('ira-i').value = fmtFull(val);
+  document.getElementById('ira-net').textContent = fmtFull(Math.round(val * 0.675));
+  update();
+}
+
+function updateRetirement() {
+  const val = parseInt(document.getElementById('retirement-r').value);
+  state.retirement = val;
+  document.getElementById('retirement-i').value = fmtFull(val);
+  update();
+}
+
+function updateOtherAssets() {
+  const val = parseInt(document.getElementById('other-assets-r').value);
+  state.otherAssets = val;
+  document.getElementById('other-assets-i').value = fmtFull(val);
+  update();
+}
+
+// FEATURE 4: Concentration Risk
+function updateConcentration() {
+  const val = parseInt(document.getElementById('concentration-r').value);
+  state.concentrationPct = val;
+  document.getElementById('concentration-i').textContent = val + '%';
+  
+  const warning = document.getElementById('concentration-warning');
+  const scenario = document.getElementById('concentration-scenario');
+  
+  if (val < 40) {
+    warning.className = 'concentration-warning low';
+    warning.innerHTML = '✅ <strong>Well diversified</strong>';
+    scenario.style.display = 'none';
+  } else if (val <= 60) {
+    warning.className = 'concentration-warning moderate';
+    warning.innerHTML = '⚠️ <strong>Moderate concentration</strong> — one client loss = significant income hit';
+    scenario.style.display = 'block';
+  } else {
+    warning.className = 'concentration-warning';
+    warning.style.background = 'rgba(224,85,85,0.07)';
+    warning.style.borderColor = 'rgba(224,85,85,0.2)';
+    warning.innerHTML = '❌ <strong>High concentration risk</strong> — this is your biggest financial risk for the sailing life. One client departure could strand you mid-passage.';
+    scenario.style.display = 'block';
+  }
+  
+  update();
+}
+
+// FEATURE 5: SF Cost Offset
+function updateSFCosts() {
+  state.sfRent = parseInt(document.getElementById('sf-rent-r').value);
+  state.sfCar = parseInt(document.getElementById('sf-car-r').value);
+  state.caTaxRate = parseFloat(document.getElementById('ca-tax-r').value);
+  
+  document.getElementById('sf-rent-i').value = '$' + state.sfRent.toLocaleString();
+  document.getElementById('sf-car-i').value = '$' + state.sfCar.toLocaleString();
+  document.getElementById('ca-tax-i').textContent = state.caTaxRate + '%';
+  
+  update();
+}
+
+// FEATURE 6: Resale Value
+function updateYearsSelling() {
+  const val = parseInt(document.getElementById('years-selling-r').value);
+  state.yearsSelling = val;
+  document.getElementById('years-selling-i').textContent = val;
+  document.getElementById('resale-years').textContent = val;
+  document.getElementById('rent-years').textContent = val;
+  update();
+}
+
+function updateRetentionRate() {
+  const val = parseInt(document.getElementById('retention-rate-r').value);
+  state.retentionRate = val;
+  document.getElementById('retention-rate-i').textContent = val + '%';
+  update();
+}
+
+// FEATURE 2: Exit Scenario
+function updateExitScenario() {
+  state.boatSaleEstimate = parseInt(document.getElementById('boat-sale-r').value);
+  state.transitionMonths = parseInt(document.getElementById('transition-months-r').value);
+  state.apartmentCost = parseInt(document.getElementById('apartment-cost-r').value);
+  state.flightsCost = parseInt(document.getElementById('flights-cost-r').value);
+  
+  document.getElementById('boat-sale-i').value = fmtFull(state.boatSaleEstimate);
+  document.getElementById('transition-months-i').textContent = state.transitionMonths;
+  document.getElementById('apartment-cost-i').value = fmtFull(state.apartmentCost);
+  document.getElementById('flights-cost-i').value = fmtFull(state.flightsCost);
+  
+  update();
+}
+
+// FEATURE 3: Reverse Calculator
+function updateReverseCalculator() {
+  state.targetYear = parseInt(document.getElementById('target-year').value);
+  update();
+}
+
+function toggleCollapsible(id) {
+  const content = document.getElementById(id + '-content');
+  const icon = document.getElementById(id + '-icon');
+  
+  if (content.classList.contains('open')) {
+    content.classList.remove('open');
+    icon.classList.remove('open');
+  } else {
+    content.classList.add('open');
+    icon.classList.add('open');
+  }
 }
 
 function compute() {
   const addonTotal = state.addons.filter(a=>a.on).reduce((s,a)=>s+a.cost, 0);
   const purchaseTotal = state.boatPrice + addonTotal;
 
+  // FEATURE 1: Use balance sheet instead of single savings figure
+  const availableForPurchase = state.liquidSavings + state.brokerage;
+  const emergencyBackstop = Math.round(state.ira * 0.675);
+  
   // Financing calculations
   const downPayment = state.paymentMethod === 'finance' ? Math.round(purchaseTotal * state.downPaymentPct / 100) : 0;
   const loanAmount = state.paymentMethod === 'finance' ? purchaseTotal - downPayment : 0;
@@ -736,7 +1236,7 @@ function compute() {
   const monthlyTotal = Object.values(monthly).reduce((s,v)=>s+v, 0);
   const annualBudget = monthlyTotal * 12;
 
-  // Calculate savings needed based on payment method
+  // Calculate savings needed based on payment method - use available funds
   const baseMonthlyForEmergency = Object.entries(monthly)
     .filter(([k,v]) => k !== 'loanPayment')
     .reduce((s,[k,v]) => s+v, 0);
@@ -748,7 +1248,7 @@ function compute() {
     ? downPayment + addonTotal + emergencyFund + ohShit
     : purchaseTotal + emergencyFund + ohShit;
     
-  const gap = Math.max(0, savingsNeeded - state.savings);
+  const gap = Math.max(0, savingsNeeded - availableForPurchase);
   const months = state.rate > 0 ? Math.ceil(gap / state.rate) : (gap > 0 ? Infinity : 0);
 
   // Tax calculations - US citizens pay on worldwide income
@@ -763,28 +1263,60 @@ function compute() {
   const dropIncomeAfterTax = dropIncome * (1 - state.taxRate / 100);
   const dropIncomeMonthly = dropIncomeAfterTax / 12;
   const netBurn = Math.max(0, monthlyTotal - dropIncomeMonthly);
-  const runwayMonths = netBurn > 0 ? Math.floor(state.savings / netBurn) : 999;
+  const runwayMonths = netBurn > 0 ? Math.floor(availableForPurchase / netBurn) : 999;
+  
+  // FEATURE 4: Concentration risk calculations
+  const topClientIncome = Math.round(state.income * state.concentrationPct / 100);
+  const remainingIncome = state.income - topClientIncome;
+  const remainingIncomeAfterTax = remainingIncome * (1 - state.taxRate / 100);
+  const remainingIncomeMonthly = remainingIncomeAfterTax / 12;
+  const clientLossNetBurn = Math.max(0, monthlyTotal - remainingIncomeMonthly);
+  const clientLossRunway = clientLossNetBurn > 0 ? Math.floor(availableForPurchase / clientLossNetBurn) : 999;
   
   // Financial checks - use GROSS income requirement
   const incomeOk = state.income >= grossRequired;
   const boatRatio = state.boatPrice / (state.income || 1);
   const boatOk = boatRatio <= 3.5;
-  const coversPurchase = state.savings >= savingsNeeded;
-  const coversEmergency = state.savings >= savingsNeeded;
+  const coversPurchase = availableForPurchase >= savingsNeeded;
+  const coversEmergency = availableForPurchase >= savingsNeeded;
   
   // Recurring income coverage (after tax)
   const recurringAfterTax = recurringAmt * (1 - state.taxRate / 100);
   const recurringCoverage = monthlyTotal > 0 ? (recurringAfterTax / 12) / monthlyTotal : 0;
   const runway6mo = dropIncomeMonthly >= monthlyTotal || runwayMonths >= 6;
 
-  // Comparison calculations
+  // Comparison calculations - use available funds
   const cashSavingsNeeded = purchaseTotal + emergencyFund + ohShit;
   const financeSavingsNeeded = downPayment + addonTotal + emergencyFund + ohShit;
-  const cashGap = Math.max(0, cashSavingsNeeded - state.savings);
-  const financeGap = Math.max(0, financeSavingsNeeded - state.savings);
+  const cashGap = Math.max(0, cashSavingsNeeded - availableForPurchase);
+  const financeGap = Math.max(0, financeSavingsNeeded - availableForPurchase);
   const cashMonths = state.rate > 0 ? Math.ceil(cashGap / state.rate) : (cashGap > 0 ? Infinity : 0);
   const financeMonths = state.rate > 0 ? Math.ceil(financeGap / state.rate) : (financeGap > 0 ? Infinity : 0);
 
+  // FEATURE 5: SF Cost Offset calculations
+  const sfCostsEliminated = state.sfRent + state.sfCar;
+  const caTaxSavings = Math.round((state.income * state.caTaxRate / 100) / 12);
+  const totalSFEliminated = sfCostsEliminated + caTaxSavings;
+  const netLifestyleCost = monthlyTotal - totalSFEliminated;
+  
+  // FEATURE 6: Resale calculations
+  const resaleValue = Math.round(state.boatPrice * Math.pow(state.retentionRate / 100, state.yearsSelling / 10));
+  const netBoatCost = purchaseTotal - resaleValue;
+  const annualizedBoatCost = Math.round(netBoatCost / state.yearsSelling);
+  const rentComparison = 3200 * 12 * state.yearsSelling;
+  
+  // FEATURE 2: Exit scenario calculations
+  const netFromBoatSale = state.boatSaleEstimate - (state.paymentMethod === 'finance' ? Math.max(0, loanAmount - (monthlyLoanPayment * 12 * 2)) : 0); // Rough remaining balance estimate
+  const transitionCost = Math.round((monthlyTotal * state.transitionMonths) + state.apartmentCost + state.flightsCost);
+  const netExitPosition = netFromBoatSale - transitionCost;
+  
+  // FEATURE 3: Reverse calculator
+  const now = new Date(2026, 1); // Feb 2026
+  const targetDate = new Date(state.targetYear, 0); // Jan of target year
+  const monthsToTarget = Math.max(0, (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth()));
+  const requiredMonthlySavings = monthsToTarget > 0 ? Math.ceil(gap / monthsToTarget) : 0;
+  const isReverseFeasible = requiredMonthlySavings <= state.income * 0.3 / 12; // 30% of income max
+  
   return {
     addonTotal, purchaseTotal,
     monthly, monthlyTotal, annualBudget,
@@ -796,7 +1328,19 @@ function compute() {
     // Financing specific
     downPayment, loanAmount, monthlyLoanPayment, totalInterest,
     savingsNeeded, cashSavingsNeeded, financeSavingsNeeded,
-    cashMonths, financeMonths, baseMonthlyForEmergency
+    cashMonths, financeMonths, baseMonthlyForEmergency,
+    // FEATURE 1: Balance sheet
+    availableForPurchase, emergencyBackstop,
+    // FEATURE 4: Concentration
+    topClientIncome, remainingIncome, clientLossRunway,
+    // FEATURE 5: SF offset
+    sfCostsEliminated, caTaxSavings, totalSFEliminated, netLifestyleCost,
+    // FEATURE 6: Resale
+    resaleValue, netBoatCost, annualizedBoatCost, rentComparison,
+    // FEATURE 2: Exit scenario
+    netFromBoatSale, transitionCost, netExitPosition,
+    // FEATURE 3: Reverse calculator
+    monthsToTarget, requiredMonthlySavings, isReverseFeasible
   };
 }
 
@@ -920,6 +1464,95 @@ function update() {
   document.getElementById('monthly-total').textContent = fmtFull(d.monthlyTotal);
   document.getElementById('annual-total').textContent = fmtFull(d.annualBudget);
 
+  // FEATURE 1: Balance sheet updates
+  document.getElementById('available-purchase').textContent = fmtFull(d.availableForPurchase);
+  document.getElementById('emergency-backstop').textContent = fmtFull(d.emergencyBackstop);
+  document.getElementById('ira-net').textContent = fmtFull(d.emergencyBackstop);
+
+  // FEATURE 4: Concentration risk updates
+  if (state.concentrationPct > 0) {
+    document.getElementById('post-client-loss-income').textContent = fmtFull(d.remainingIncome / 12) + '/mo';
+    document.getElementById('client-loss-runway').textContent = d.clientLossRunway + ' months';
+  }
+
+  // FEATURE 5: SF Cost Offset updates
+  document.getElementById('sf-costs-eliminated').textContent = fmtFull(d.sfCostsEliminated);
+  document.getElementById('ca-tax-savings').textContent = fmtFull(d.caTaxSavings);
+  document.getElementById('total-sf-eliminated').textContent = fmtFull(d.totalSFEliminated);
+  
+  const netCostEl = document.getElementById('net-lifestyle-cost');
+  if (d.netLifestyleCost < 0) {
+    netCostEl.textContent = `Your sailboat lifestyle actually costs ${fmtFull(Math.abs(d.netLifestyleCost))}/mo LESS than SF`;
+    netCostEl.style.color = 'var(--green)';
+  } else {
+    netCostEl.textContent = `Net sailboat lifestyle cost: ${fmtFull(d.netLifestyleCost)}/mo MORE than SF`;
+    netCostEl.style.color = 'var(--amber)';
+  }
+
+  // FEATURE 6: Resale value updates
+  document.getElementById('resale-value').textContent = fmtFull(d.resaleValue);
+  document.getElementById('net-boat-cost').textContent = fmtFull(d.netBoatCost);
+  document.getElementById('annualized-cost').textContent = fmtFull(d.annualizedBoatCost) + '/yr';
+  document.getElementById('rent-comparison').textContent = fmtFull(d.rentComparison);
+
+  // FEATURE 2: Exit scenario updates
+  document.getElementById('net-boat-sale').textContent = fmtFull(d.netFromBoatSale);
+  document.getElementById('reentry-cost').textContent = fmtFull(d.transitionCost);
+  document.getElementById('net-exit-position').textContent = fmtFull(d.netExitPosition);
+  
+  const exitRow = document.getElementById('net-exit-row');
+  const exitSummary = document.getElementById('exit-summary');
+  const exitMessage = document.getElementById('exit-message');
+  
+  if (d.netExitPosition > 0) {
+    exitRow.querySelector('.tv').style.color = 'var(--green)';
+    exitSummary.style.background = 'rgba(46,204,113,0.07)';
+    exitSummary.style.borderColor = 'rgba(46,204,113,0.2)';
+    exitMessage.style.color = 'var(--green)';
+    exitMessage.textContent = `✅ You come out ahead! Worst case exit: sell boat, pay re-entry costs, end up with ${fmtFull(d.netExitPosition)}. Your IRA backstop adds another ${fmtFull(d.emergencyBackstop)} if needed.`;
+  } else if (d.netExitPosition > -20000) {
+    exitRow.querySelector('.tv').style.color = 'var(--amber)';
+    exitSummary.style.background = 'rgba(240,165,0,0.07)';
+    exitSummary.style.borderColor = 'rgba(240,165,0,0.2)';
+    exitMessage.style.color = 'var(--amber)';
+    exitMessage.textContent = `⚠️ Close call. Worst case exit: you'd be ${fmtFull(Math.abs(d.netExitPosition))} short, but your IRA backstop of ${fmtFull(d.emergencyBackstop)} covers it.`;
+  } else {
+    exitRow.querySelector('.tv').style.color = 'var(--red)';
+    exitSummary.style.background = 'rgba(224,85,85,0.07)';
+    exitSummary.style.borderColor = 'rgba(224,85,85,0.2)';
+    exitMessage.style.color = 'var(--red)';
+    exitMessage.textContent = `❌ Risky exit. You'd be ${fmtFull(Math.abs(d.netExitPosition))} short even after selling. Your IRA backstop of ${fmtFull(d.emergencyBackstop)} helps but doesn't fully cover it.`;
+  }
+
+  // FEATURE 3: Reverse calculator updates
+  document.getElementById('reverse-months-remaining').textContent = d.monthsToTarget;
+  document.getElementById('reverse-required-savings').textContent = fmtFull(d.requiredMonthlySavings);
+  document.getElementById('current-savings-rate').textContent = fmtFull(state.rate);
+  
+  const currentReadyDate = new Date(2026, 1 + d.months);
+  document.getElementById('current-ready-date').textContent = currentReadyDate.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  
+  const feasibilityEl = document.getElementById('reverse-feasibility');
+  const reverseMessageEl = document.getElementById('reverse-message');
+  
+  if (d.gap <= 0) {
+    feasibilityEl.style.background = 'rgba(46,204,113,0.1)';
+    reverseMessageEl.style.color = 'var(--green)';
+    reverseMessageEl.textContent = `✅ You're already ready! Target exceeded by ${fmtFull(Math.abs(d.gap))}`;
+  } else if (d.isReverseFeasible) {
+    feasibilityEl.style.background = 'rgba(46,204,113,0.1)';
+    reverseMessageEl.style.color = 'var(--green)';
+    reverseMessageEl.textContent = `✅ Achievable at current income (${Math.round(d.requiredMonthlySavings/(state.income/12)*100)}% of monthly gross)`;
+  } else if (d.requiredMonthlySavings <= state.income * 0.5 / 12) {
+    feasibilityEl.style.background = 'rgba(240,165,0,0.1)';
+    reverseMessageEl.style.color = 'var(--amber)';
+    reverseMessageEl.textContent = `⚠️ Tight but possible (${Math.round(d.requiredMonthlySavings/(state.income/12)*100)}% of monthly gross)`;
+  } else {
+    feasibilityEl.style.background = 'rgba(224,85,85,0.1)';
+    reverseMessageEl.style.color = 'var(--red)';
+    reverseMessageEl.textContent = `❌ Requires income increase (need ${Math.round(d.requiredMonthlySavings/(state.income/12)*100)}% of monthly gross)`;
+  }
+
   // Your numbers
   document.getElementById('t-purchase').textContent = state.paymentMethod === 'finance' ? fmtFull(d.downPayment + d.addonTotal) : fmtFull(d.purchaseTotal);
   document.getElementById('t-emergency').textContent = fmtFull(d.emergencyFund);
@@ -930,12 +1563,12 @@ function update() {
   document.getElementById('drop-income').textContent = fmtFull(d.dropIncome) + '/yr';
   document.getElementById('runway-months').textContent = d.runwayMonths + ' months';
 
-  const pct = Math.min(100, Math.round((state.savings / d.savingsNeeded) * 100));
+  const pct = Math.min(100, Math.round((d.availableForPurchase / d.savingsNeeded) * 100));
   document.getElementById('prog-pct').textContent = pct + '%';
   const fill = document.getElementById('prog-fill');
   fill.style.width = pct + '%';
   fill.style.background = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--accent)';
-  document.getElementById('prog-label').textContent = `${fmtFull(state.savings)} of ${fmtFull(d.savingsNeeded)}`;
+  document.getElementById('prog-label').textContent = `${fmtFull(d.availableForPurchase)} of ${fmtFull(d.savingsNeeded)}`;
   const gapEl = document.getElementById('prog-gap');
   if (d.gap <= 0) { gapEl.textContent = '✓ Target met!'; gapEl.style.color = 'var(--green)'; }
   else { gapEl.textContent = fmtFull(d.gap) + ' gap'; gapEl.style.color = 'var(--amber)'; }
@@ -957,21 +1590,21 @@ function update() {
         : `Boat is ${d.boatRatio.toFixed(1)}× income — recommend under 3.5×`,
     },
     {
-      ok: d.coversPurchase, warn: !d.coversPurchase && state.savings >= state.boatPrice,
-      title: state.paymentMethod === 'finance' ? 'Savings cover down payment + expenses' : 'Savings cover all-in purchase',
+      ok: d.coversPurchase, warn: !d.coversPurchase && d.availableForPurchase >= state.boatPrice,
+      title: state.paymentMethod === 'finance' ? 'Available funds cover down payment + expenses' : 'Available funds cover all-in purchase',
       detail: d.coversPurchase
         ? (state.paymentMethod === 'finance' 
-            ? `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.downPayment + d.addonTotal)} down payment + expenses`
-            : `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.purchaseTotal)} all-in`)
+            ? `✓ ${fmtFull(d.availableForPurchase)} covers ${fmtFull(d.downPayment + d.addonTotal)} down payment + expenses`
+            : `✓ ${fmtFull(d.availableForPurchase)} covers ${fmtFull(d.purchaseTotal)} all-in`)
         : (state.paymentMethod === 'finance' 
-            ? `Need ${fmtFull(d.savingsNeeded - state.savings)} more for down payment + expenses`
-            : `Need ${fmtFull(d.purchaseTotal - state.savings)} more for all-in cost`),
+            ? `Need ${fmtFull(d.savingsNeeded - d.availableForPurchase)} more for down payment + expenses`
+            : `Need ${fmtFull(d.purchaseTotal - d.availableForPurchase)} more for all-in cost`),
     },
     {
       ok: d.coversEmergency, warn: d.coversPurchase && !d.coversEmergency,
       title: '12-month emergency fund on top of purchase',
       detail: d.coversEmergency
-        ? `✓ Savings cover purchase + ${fmtFull(d.emergencyFund)} emergency fund`
+        ? `✓ Available funds cover purchase + ${fmtFull(d.emergencyFund)} emergency fund`
         : `After purchase, you'd need ${fmtFull(d.emergencyFund)} emergency fund`,
     },
     {
@@ -982,7 +1615,7 @@ function update() {
     {
       ok: d.runway6mo, warn: d.runwayMonths >= 3,
       title: '6+ month runway if income drops 50%',
-      detail: `At 50% income (${fmtFull(d.dropIncome)}/yr gross), you'd have ${d.runwayMonths} months runway using savings`,
+      detail: `At 50% income (${fmtFull(d.dropIncome)}/yr gross), you'd have ${d.runwayMonths} months runway using available funds`,
     }
   ];
   
@@ -1092,10 +1725,22 @@ renderAddons();
 bindSlider('boat-r', 'boat-i', 'boatPrice', 150000, 400000);
 bindSlider('income-r', 'income-i', 'income', 100000, 2000000);
 bindSlider('recurring-r', 'recurring-i', 'recurringPct', 0, 100);
-bindSlider('savings-r', 'savings-i', 'savings', 0, 2000000);
 bindSlider('rate-r', 'rate-i', 'rate', 0, 50000);
 bindSlider('tax-r', 'tax-i', 'taxRate', 15, 50);
 bindFinancingSliders();
+
+// Initialize all feature-specific elements
+updateConcentration();
+updateSFCosts();
+updateYearsSelling();
+updateRetentionRate();
+updateExitScenario();
+updateReverseCalculator();
+updateLiquid();
+updateBrokerage();
+updateIRA();
+updateRetirement();
+updateOtherAssets();
 
 // Set initial boat selection
 selectBoat();
