@@ -434,8 +434,8 @@
         <div class="div"></div>
         <div class="section" style="color:var(--accent)">Finance vs Cash</div>
         <div class="tabs" style="margin-bottom:14px">
-          <button class="tab on" onclick="setPaymentMethod('cash')">💰 Pay Cash</button>
-          <button class="tab" onclick="setPaymentMethod('finance')">🏦 Finance</button>
+          <button class="tab on" onclick="setPaymentMethod('finance')">🏦 Finance</button>
+          <button class="tab" onclick="setPaymentMethod('cash')">💰 Pay Cash</button>
         </div>
         
         <div id="financing-inputs" style="display:none">
@@ -945,7 +945,7 @@ const state = {
   otherAssets: 0,
   rate: 15000,
   taxRate: 38,
-  paymentMethod: 'cash',
+  paymentMethod: 'finance',
   downPaymentPct: 20,
   interestRate: 7.5,
   loanTermYears: 15,
