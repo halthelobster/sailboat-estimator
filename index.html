@@ -915,10 +915,16 @@
 </div>
 
 <div style="text-align:center;padding:20px 16px 8px">
-  <button onclick="exportScenario()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.3px">
-    📤 Export My Scenario
-  </button>
-  <div style="font-size:11px;color:var(--muted);margin-top:8px">Saves a file you can send to Hal to pick up exactly where you left off</div>
+  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+    <button onclick="exportScenario()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.3px">
+      📤 Export My Scenario
+    </button>
+    <button onclick="document.getElementById('import-file').click()" style="background:transparent;color:var(--accent);border:2px solid var(--accent);border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.3px">
+      📥 Load Scenario
+    </button>
+    <input type="file" id="import-file" accept=".md,.json" style="display:none" onchange="loadScenario(this)">
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px">Export to save your setup · Load to restore it instantly</div>
 </div>
 
 <footer>
@@ -1781,6 +1787,73 @@ selectBoat();
 update();
 </script>
 <script>
+function loadScenario(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      // Extract JSON block from markdown (between ```json and ```)
+      const jsonMatch = text.match(/```json\s*([\s\S]*?)```/);
+      const raw = jsonMatch ? jsonMatch[1] : text;
+      const loaded = JSON.parse(raw.trim());
+      // Merge loaded state into current state (only known keys)
+      Object.keys(state).forEach(key => {
+        if (loaded[key] !== undefined) state[key] = loaded[key];
+      });
+      // Sync all slider/input elements to restored state
+      const syncEl = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      syncEl('boat-price-r', state.boatPrice); syncEl('boat-price-i', state.boatPrice);
+      syncEl('down-payment-r', state.downPaymentPct); syncEl('down-payment-i', state.downPaymentPct);
+      syncEl('interest-rate-r', state.loanInterestRate); syncEl('interest-rate-i', state.loanInterestRate);
+      syncEl('income-r', state.annualIncome); syncEl('income-i', state.annualIncome);
+      syncEl('recurring-r', state.recurringPct); syncEl('recurring-i', state.recurringPct);
+      syncEl('savings-rate-r', state.monthlySavingsRate); syncEl('savings-rate-i', state.monthlySavingsRate);
+      syncEl('tax-rate-r', state.taxRate); syncEl('tax-rate-i', state.taxRate);
+      syncEl('top-client-r', state.topClientPct); syncEl('top-client-i', state.topClientPct);
+      syncEl('liquid-savings-r', state.liquidSavings); syncEl('liquid-savings-i', state.liquidSavings);
+      syncEl('brokerage-savings-r', state.brokerageSavings); syncEl('brokerage-savings-i', state.brokerageSavings);
+      syncEl('ira-savings-r', state.iraSavings); syncEl('ira-savings-i', state.iraSavings);
+      syncEl('retirement-401k-r', state.retirement401k); syncEl('retirement-401k-i', state.retirement401k);
+      syncEl('sf-rent-r', state.sfRent); syncEl('sf-rent-i', state.sfRent);
+      syncEl('sf-car-r', state.sfCar); syncEl('sf-car-i', state.sfCar);
+      syncEl('years-selling-r', state.yearsSelling); syncEl('years-selling-i', state.yearsSelling);
+      // Selects
+      const loanTermEl = document.getElementById('loan-term');
+      if (loanTermEl) loanTermEl.value = state.loanTermYears;
+      const targetYearEl = document.getElementById('target-year');
+      if (targetYearEl) targetYearEl.value = state.targetYear || 2027;
+      // Boat selection
+      if (state.boatSelection) {
+        document.querySelectorAll('.boat-btn').forEach(b => {
+          b.classList.toggle('on', b.dataset.boat === state.boatSelection);
+        });
+      }
+      // Payment method tabs
+      document.querySelectorAll('.tab').forEach(b => {
+        const method = b.getAttribute('onclick')?.match(/setPaymentMethod\('(\w+)'\)/)?.[1];
+        if (method) b.classList.toggle('on', method === state.paymentMethod);
+      });
+      // Lifestyle mode and region
+      document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === state.lifestyleMode));
+      document.querySelectorAll('[data-region]').forEach(b => b.classList.toggle('on', b.dataset.region === state.region));
+      update();
+      // Show confirmation
+      const btn = document.querySelector('button[onclick*="import-file"]');
+      const orig = btn.textContent;
+      btn.textContent = '✅ Loaded!';
+      btn.style.borderColor = 'var(--green)';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => { btn.textContent = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+    } catch(err) {
+      alert('Could not load scenario: ' + err.message);
+    }
+    input.value = ''; // reset so same file can be re-loaded
+  };
+  reader.readAsText(file);
+}
+
 function exportScenario() {
   const d = compute();
   const date = new Date().toISOString().split('T')[0];
