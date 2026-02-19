@@ -653,7 +653,8 @@ const CAT_LBL = {
   bonnie:'Bonnie (dog) — vet, health certs, food', 
   starlink:'Starlink — $165/mo default',
   health:'Expat health insurance — $400/mo (US citizen abroad)',
-  travel:'Travel (flights home)', misc:'Misc'
+  travel:'Travel (flights home)', misc:'Misc',
+  loanPayment:'Loan payment'
 };
 
 function fmt(n) {
@@ -685,6 +686,24 @@ function compute() {
   const addonTotal = state.addons.filter(a=>a.on).reduce((s,a)=>s+a.cost, 0);
   const purchaseTotal = state.boatPrice + addonTotal;
 
+  // Financing calculations
+  const downPayment = state.paymentMethod === 'finance' ? Math.round(purchaseTotal * state.downPaymentPct / 100) : 0;
+  const loanAmount = state.paymentMethod === 'finance' ? purchaseTotal - downPayment : 0;
+  
+  let monthlyLoanPayment = 0;
+  let totalInterest = 0;
+  
+  if (state.paymentMethod === 'finance' && loanAmount > 0) {
+    const r = state.interestRate / 100 / 12; // Monthly rate
+    const n = state.loanTermYears * 12; // Number of months
+    if (r > 0) {
+      monthlyLoanPayment = Math.round(loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+      totalInterest = (monthlyLoanPayment * n) - loanAmount;
+    } else {
+      monthlyLoanPayment = Math.round(loanAmount / n);
+    }
+  }
+
   const mode = MODES[state.mode];
   const mult = MULTS[state.region];
   const isCatamaran = state.boat === 'leopard40';
@@ -709,13 +728,27 @@ function compute() {
     monthly[k] = cost;
   }
   
+  // Add loan payment to monthly costs when financing
+  if (state.paymentMethod === 'finance' && monthlyLoanPayment > 0) {
+    monthly.loanPayment = monthlyLoanPayment;
+  }
+  
   const monthlyTotal = Object.values(monthly).reduce((s,v)=>s+v, 0);
   const annualBudget = monthlyTotal * 12;
 
-  const emergencyFund = monthlyTotal * 12;
+  // Calculate savings needed based on payment method
+  const baseMonthlyForEmergency = Object.entries(monthly)
+    .filter(([k,v]) => k !== 'loanPayment')
+    .reduce((s,[k,v]) => s+v, 0);
+  
+  const emergencyFund = baseMonthlyForEmergency * 12;
   const ohShit = 50000;
-  const target = purchaseTotal + emergencyFund + ohShit;
-  const gap = Math.max(0, target - state.savings);
+  
+  const savingsNeeded = state.paymentMethod === 'finance' 
+    ? downPayment + addonTotal + emergencyFund + ohShit
+    : purchaseTotal + emergencyFund + ohShit;
+    
+  const gap = Math.max(0, savingsNeeded - state.savings);
   const months = state.rate > 0 ? Math.ceil(gap / state.rate) : (gap > 0 ? Infinity : 0);
 
   // Tax calculations - US citizens pay on worldwide income
@@ -736,22 +769,34 @@ function compute() {
   const incomeOk = state.income >= grossRequired;
   const boatRatio = state.boatPrice / (state.income || 1);
   const boatOk = boatRatio <= 3.5;
-  const coversPurchase = state.savings >= purchaseTotal;
-  const coversEmergency = state.savings >= purchaseTotal + emergencyFund;
+  const coversPurchase = state.savings >= savingsNeeded;
+  const coversEmergency = state.savings >= savingsNeeded;
   
   // Recurring income coverage (after tax)
   const recurringAfterTax = recurringAmt * (1 - state.taxRate / 100);
   const recurringCoverage = monthlyTotal > 0 ? (recurringAfterTax / 12) / monthlyTotal : 0;
   const runway6mo = dropIncomeMonthly >= monthlyTotal || runwayMonths >= 6;
 
+  // Comparison calculations
+  const cashSavingsNeeded = purchaseTotal + emergencyFund + ohShit;
+  const financeSavingsNeeded = downPayment + addonTotal + emergencyFund + ohShit;
+  const cashGap = Math.max(0, cashSavingsNeeded - state.savings);
+  const financeGap = Math.max(0, financeSavingsNeeded - state.savings);
+  const cashMonths = state.rate > 0 ? Math.ceil(cashGap / state.rate) : (cashGap > 0 ? Infinity : 0);
+  const financeMonths = state.rate > 0 ? Math.ceil(financeGap / state.rate) : (financeGap > 0 ? Infinity : 0);
+
   return {
     addonTotal, purchaseTotal,
     monthly, monthlyTotal, annualBudget,
-    emergencyFund, ohShit, target, gap, months,
+    emergencyFund, ohShit, target: savingsNeeded, gap, months,
     netRequired, grossRequired, incomeOk, boatRatio, boatOk,
     coversPurchase, coversEmergency,
     recurringAmt, projectAmt, dropIncome, runwayMonths,
-    recurringCoverage, runway6mo
+    recurringCoverage, runway6mo,
+    // Financing specific
+    downPayment, loanAmount, monthlyLoanPayment, totalInterest,
+    savingsNeeded, cashSavingsNeeded, financeSavingsNeeded,
+    cashMonths, financeMonths, baseMonthlyForEmergency
   };
 }
 
@@ -781,6 +826,28 @@ function setMode(m) {
 
 function updateSkills() {
   // Just trigger update, skills are checked in the compute phase
+  update();
+}
+
+function setPaymentMethod(method) {
+  state.paymentMethod = method;
+  
+  // Update tab styling
+  document.querySelectorAll('.tabs button').forEach(t => t.classList.remove('on'));
+  document.querySelector(`[onclick="setPaymentMethod('${method}')"]`).classList.add('on');
+  
+  // Show/hide financing inputs and comparison
+  const inputs = document.getElementById('financing-inputs');
+  const comparison = document.getElementById('finance-comparison');
+  
+  if (method === 'finance') {
+    inputs.style.display = 'block';
+    comparison.style.display = 'block';
+  } else {
+    inputs.style.display = 'none';
+    comparison.style.display = 'none';
+  }
+  
   update();
 }
 
@@ -854,21 +921,21 @@ function update() {
   document.getElementById('annual-total').textContent = fmtFull(d.annualBudget);
 
   // Your numbers
-  document.getElementById('t-purchase').textContent = fmtFull(d.purchaseTotal);
+  document.getElementById('t-purchase').textContent = state.paymentMethod === 'finance' ? fmtFull(d.downPayment + d.addonTotal) : fmtFull(d.purchaseTotal);
   document.getElementById('t-emergency').textContent = fmtFull(d.emergencyFund);
-  document.getElementById('t-total').textContent = fmtFull(d.target);
+  document.getElementById('t-total').textContent = fmtFull(d.savingsNeeded);
 
   document.getElementById('recurring-amt').textContent = fmtFull(d.recurringAmt);
   document.getElementById('project-amt').textContent = fmtFull(d.projectAmt);
   document.getElementById('drop-income').textContent = fmtFull(d.dropIncome) + '/yr';
   document.getElementById('runway-months').textContent = d.runwayMonths + ' months';
 
-  const pct = Math.min(100, Math.round((state.savings / d.target) * 100));
+  const pct = Math.min(100, Math.round((state.savings / d.savingsNeeded) * 100));
   document.getElementById('prog-pct').textContent = pct + '%';
   const fill = document.getElementById('prog-fill');
   fill.style.width = pct + '%';
   fill.style.background = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--accent)';
-  document.getElementById('prog-label').textContent = `${fmtFull(state.savings)} of ${fmtFull(d.target)}`;
+  document.getElementById('prog-label').textContent = `${fmtFull(state.savings)} of ${fmtFull(d.savingsNeeded)}`;
   const gapEl = document.getElementById('prog-gap');
   if (d.gap <= 0) { gapEl.textContent = '✓ Target met!'; gapEl.style.color = 'var(--green)'; }
   else { gapEl.textContent = fmtFull(d.gap) + ' gap'; gapEl.style.color = 'var(--amber)'; }
@@ -891,10 +958,14 @@ function update() {
     },
     {
       ok: d.coversPurchase, warn: !d.coversPurchase && state.savings >= state.boatPrice,
-      title: 'Savings cover all-in purchase',
+      title: state.paymentMethod === 'finance' ? 'Savings cover down payment + expenses' : 'Savings cover all-in purchase',
       detail: d.coversPurchase
-        ? `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.purchaseTotal)} all-in`
-        : `Need ${fmtFull(d.purchaseTotal - state.savings)} more for all-in cost`,
+        ? (state.paymentMethod === 'finance' 
+            ? `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.downPayment + d.addonTotal)} down payment + expenses`
+            : `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.purchaseTotal)} all-in`)
+        : (state.paymentMethod === 'finance' 
+            ? `Need ${fmtFull(d.savingsNeeded - state.savings)} more for down payment + expenses`
+            : `Need ${fmtFull(d.purchaseTotal - state.savings)} more for all-in cost`),
     },
     {
       ok: d.coversEmergency, warn: d.coversPurchase && !d.coversEmergency,
@@ -946,6 +1017,74 @@ function update() {
   
   const recReq = Math.round((d.grossRequired) / (state.income || 1) * 100);
   document.getElementById('tl-recurring').textContent = recReq + '%';
+
+  // Financing comparison updates
+  if (state.paymentMethod === 'finance' || document.getElementById('finance-comparison').style.display !== 'none') {
+    // Update monthly payment
+    if (d.monthlyLoanPayment) {
+      document.getElementById('monthly-payment').textContent = fmtFull(d.monthlyLoanPayment);
+    }
+
+    // Cash scenario
+    const cashMonthlyBurn = d.baseMonthlyForEmergency;
+    document.getElementById('cash-savings-needed').textContent = fmtFull(d.cashSavingsNeeded);
+    document.getElementById('cash-monthly-burn').textContent = fmtFull(cashMonthlyBurn);
+    document.getElementById('cash-months-ready').textContent = d.cashMonths === 0 ? 'Ready!' : (d.cashMonths === Infinity ? '∞' : d.cashMonths + ' mo');
+    document.getElementById('cash-total-cost').textContent = fmtFull(d.purchaseTotal);
+
+    // Finance scenario  
+    const financeMonthlyBurn = d.monthlyTotal;
+    document.getElementById('finance-savings-needed').textContent = fmtFull(d.financeSavingsNeeded);
+    document.getElementById('finance-monthly-burn').textContent = fmtFull(financeMonthlyBurn);
+    document.getElementById('finance-months-ready').textContent = d.financeMonths === 0 ? 'Ready!' : (d.financeMonths === Infinity ? '∞' : d.financeMonths + ' mo');
+    document.getElementById('finance-total-cost').textContent = fmtFull(d.purchaseTotal + d.totalInterest);
+    document.getElementById('finance-interest-paid').textContent = fmtFull(d.totalInterest);
+
+    // Key insight
+    const insightEl = document.getElementById('insight-text');
+    if (d.financeMonths < d.cashMonths && d.financeMonths !== Infinity && d.cashMonths !== Infinity) {
+      const monthsSaved = d.cashMonths - d.financeMonths;
+      insightEl.textContent = `Financing gets you on the water ${monthsSaved} months sooner, costs ${fmtFull(d.totalInterest)} extra in interest over ${state.loanTermYears} years`;
+      insightEl.parentElement.style.borderColor = 'rgba(46,204,113,0.3)';
+      insightEl.parentElement.style.background = 'rgba(46,204,113,0.1)';
+      insightEl.style.color = 'var(--green)';
+    } else if (d.cashMonths < d.financeMonths && d.financeMonths !== Infinity && d.cashMonths !== Infinity) {
+      const monthsSaved = d.financeMonths - d.cashMonths;
+      insightEl.textContent = `Paying cash gets you there ${monthsSaved} months sooner and saves ${fmtFull(d.totalInterest)} in interest`;
+      insightEl.parentElement.style.borderColor = 'rgba(59,157,232,0.3)';
+      insightEl.parentElement.style.background = 'rgba(59,157,232,0.1)';
+      insightEl.style.color = 'var(--accent)';
+    } else if (d.cashMonths === d.financeMonths) {
+      insightEl.textContent = `Both paths get you ready at the same time. Cash saves ${fmtFull(d.totalInterest)} in interest.`;
+      insightEl.parentElement.style.borderColor = 'rgba(240,165,0,0.3)';
+      insightEl.parentElement.style.background = 'rgba(240,165,0,0.1)';
+      insightEl.style.color = 'var(--amber)';
+    } else {
+      insightEl.textContent = 'Set a realistic savings rate to compare paths';
+      insightEl.parentElement.style.borderColor = 'rgba(240,165,0,0.3)';
+      insightEl.parentElement.style.background = 'rgba(240,165,0,0.1)';
+      insightEl.style.color = 'var(--amber)';
+    }
+  }
+}
+
+// Bind financing sliders
+function bindFinancingSliders() {
+  const downR = document.getElementById('down-r');
+  const downI = document.getElementById('down-i');
+  downR.addEventListener('input', () => {
+    state.downPaymentPct = parseInt(downR.value);
+    downI.textContent = state.downPaymentPct + '%';
+    update();
+  });
+  
+  const rateR = document.getElementById('rate-interest-r');
+  const rateI = document.getElementById('rate-interest-i');
+  rateR.addEventListener('input', () => {
+    state.interestRate = parseFloat(rateR.value);
+    rateI.textContent = state.interestRate + '%';
+    update();
+  });
 }
 
 // Init
@@ -956,6 +1095,7 @@ bindSlider('recurring-r', 'recurring-i', 'recurringPct', 0, 100);
 bindSlider('savings-r', 'savings-i', 'savings', 0, 2000000);
 bindSlider('rate-r', 'rate-i', 'rate', 0, 50000);
 bindSlider('tax-r', 'tax-i', 'taxRate', 15, 50);
+bindFinancingSliders();
 
 // Set initial boat selection
 selectBoat();
