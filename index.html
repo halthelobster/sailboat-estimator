@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚓ Jordan's Sailboat Financial Planner</title>
+<style>
+  :root {
+    --bg: #080e1a;
+    --card: #0f1e35;
+    --border: rgba(59,157,232,0.18);
+    --accent: #3b9de8;
+    --text: #dde8f5;
+    --muted: #7a96b8;
+    --green: #2ecc71;
+    --amber: #f0a500;
+    --red: #e05555;
+    --r: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(160deg, #0a1a30 0%, #091422 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 24px 20px;
+    text-align: center;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* STICKY BAR */
+  .bar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(9,20,34,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 0;
+  }
+  .bar-item {
+    padding: 12px 20px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    min-width: 140px;
+  }
+  .bar-item:last-child { border-right: none; }
+  .bar-item .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); }
+  .bar-item .val { font-size: 16px; font-weight: 700; color: var(--accent); margin-top: 2px; }
+  .val.g { color: var(--green); }
+  .val.a { color: var(--amber); }
+  .val.r { color: var(--red); }
+
+  /* LAYOUT */
+  .page { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 880px) { .cols { grid-template-columns: 1fr; } }
+  .full { grid-column: 1 / -1; }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card:last-child { margin-bottom: 0; }
+  .section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 14px; }
+
+  /* INPUTS */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] {
+    flex: 1; height: 4px; -webkit-appearance: none;
+    background: rgba(59,157,232,0.2); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    background: var(--accent); border-radius: 50%; cursor: pointer;
+  }
+  .num-input {
+    width: 110px; text-align: right;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); border-radius: 7px;
+    color: var(--text); font-size: 14px; font-weight: 600;
+    padding: 6px 10px;
+  }
+  .num-input:focus { outline: none; border-color: var(--accent); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab {
+    flex: 1; padding: 10px 6px; text-align: center;
+    background: transparent; border: 1px solid var(--border); border-radius: 7px;
+    color: var(--muted); font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; min-width: 120px;
+  }
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.on { background: rgba(59,157,232,0.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+  /* SELECT */
+  select {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); border-radius: 7px;
+    color: var(--text); font-size: 13px; padding: 7px 10px; outline: none; cursor: pointer;
+  }
+  select:focus { border-color: var(--accent); }
+
+  /* ADDON LIST */
+  .addon {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 8px; border-radius: 6px; cursor: pointer;
+    transition: background 0.1s;
+  }
+  .addon:hover { background: rgba(255,255,255,0.04); }
+  .addon input { accent-color: var(--accent); margin-right: 8px; cursor: pointer; }
+  .addon .aname { font-size: 12px; color: var(--text); }
+  .addon .acost { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  /* BUDGET ROWS */
+  .brow { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+  .brow:last-child { border-bottom: none; }
+  .brow .bc { color: var(--muted); }
+  .brow .ba { color: var(--text); font-weight: 500; }
+  .btotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .btotal .bl { font-size: 13px; color: var(--muted); }
+  .btotal .bv { font-size: 20px; font-weight: 700; color: var(--accent); }
+
+  /* DIVIDER */
+  .div { height: 1px; background: var(--border); margin: 14px 0; }
+
+  /* SPLIT DISPLAY */
+  .split { display: flex; gap: 16px; }
+  .split > div { flex: 1; }
+  .split-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .split-item h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+  .split-value { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .split-sub { font-size: 11px; color: var(--muted); }
+
+  /* SCENARIO BOX */
+  .scenario {
+    background: rgba(240,165,0,0.07);
+    border: 1px solid rgba(240,165,0,0.2);
+    border-radius: 8px; padding: 14px; margin-top: 12px;
+  }
+  .scenario h4 { font-size: 12px; color: var(--amber); margin-bottom: 8px; font-weight: 600; }
+  .scenario-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .scenario-row:last-child { margin-bottom: 0; }
+
+  /* TARGET ROWS */
+  .trow { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+  .trow .tc { color: var(--muted); }
+  .trow .tv { color: var(--text); font-weight: 500; }
+  .trow.total { padding-top: 8px; margin-top: 6px; border-top: 1px solid var(--border); }
+  .trow.total .tc { color: var(--text); font-weight: 600; }
+  .trow.total .tv { color: var(--accent); font-weight: 700; font-size: 16px; }
+
+  /* PROGRESS */
+  .prog-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .prog-bar { height: 7px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .prog-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* CHECKS */
+  .check {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 11px 12px; border-radius: 8px; margin-bottom: 8px;
+    border: 1px solid transparent;
+  }
+  .check.p { background: rgba(46,204,113,0.07); border-color: rgba(46,204,113,0.2); }
+  .check.w { background: rgba(240,165,0,0.07); border-color: rgba(240,165,0,0.2); }
+  .check.f { background: rgba(224,85,85,0.07); border-color: rgba(224,85,85,0.2); }
+  .check-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .check-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .check-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* CHECKBOX AREAS */
+  .check-group { margin-bottom: 16px; }
+  .check-group h4 { font-size: 12px; color: var(--accent); margin-bottom: 8px; font-weight: 600; }
+  .skill-check {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; margin-bottom: 4px;
+    border-radius: 6px; cursor: pointer;
+    transition: background 0.1s;
+  }
+  .skill-check:hover { background: rgba(255,255,255,0.04); }
+  .skill-check input { accent-color: var(--accent); cursor: pointer; }
+  .skill-check label { font-size: 12px; color: var(--text); cursor: pointer; flex: 1; }
+
+  /* TIMELINE BOX */
+  .tbox {
+    background: rgba(59,157,232,0.07);
+    border: 1px solid rgba(59,157,232,0.2);
+    border-radius: 9px; padding: 16px;
+    display: flex; flex-wrap: wrap; gap: 24px;
+    margin-top: 16px;
+  }
+  .tbox-item .tlbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 3px; }
+  .tbox-item .tval { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .tbox-item .tsub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  footer { text-align: center; padding: 20px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+  
+  @media(max-width: 680px) {
+    .bar { flex-direction: column; }
+    .bar-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .bar-item:last-child { border-bottom: none; }
+    .split { flex-direction: column; }
+    .tabs { flex-direction: column; }
+    .tab { min-width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:28px;margin-bottom:6px">⚓</div>
+  <h1>Jordan's Sailboat Financial Planner</h1>
+  <p>Your personal path to blue water cruising</p>
+</header>
+
+<div class="bar">
+  <div class="bar-item"><div class="lbl">All-In Cost</div><div class="val" id="s-purchase">—</div></div>
+  <div class="bar-item"><div class="lbl">Monthly Burn</div><div class="val" id="s-monthly">—</div></div>
+  <div class="bar-item"><div class="lbl">Months to Ready</div><div class="val" id="s-timeline">—</div></div>
+  <div class="bar-item"><div class="lbl">Recurring Coverage</div><div class="val" id="s-recurring">—</div></div>
+</div>
+
+<div class="page">
+  <div class="cols">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- Your Boat -->
+      <div class="card">
+        <div class="section">Section 1: Your Boat</div>
+        <div class="field">
+          <label>Boat Selection</label>
+          <select id="boat-sel" onchange="selectBoat()">
+            <option value="sp-cruiser">Island Packet SP Cruiser ($199k–$254k)</option>
+            <option value="ip420">Island Packet 420 ($180k–$280k)</option>
+            <option value="ip440">Island Packet 440 ($250k–$380k)</option>
+            <option value="leopard40">Leopard 40 ($200k–$350k)</option>
+            <option value="custom">Custom (enter your own)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Boat Purchase Price</label>
+          <div class="slider-row">
+            <input type="range" id="boat-r" min="150000" max="400000" step="5000" value="225000">
+            <input class="num-input" id="boat-i" value="$225,000">
+          </div>
+        </div>
+        <div class="section" style="margin-top:12px;color:var(--muted)">Add-On Costs (toggle to include)</div>
+        <div id="addon-list"></div>
+        <div class="div"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:13px;color:var(--muted)">Total All-In Cost</span>
+          <span style="font-size:20px;font-weight:700;color:var(--accent)" id="purchase-total">—</span>
+        </div>
+      </div>
+
+      <!-- Your Numbers -->
+      <div class="card">
+        <div class="section">Section 3: Your Numbers</div>
+        <div class="field">
+          <label>Annual Income</label>
+          <div class="slider-row">
+            <input type="range" id="income-r" min="100000" max="2000000" step="10000" value="500000">
+            <input class="num-input" id="income-i" value="$500,000">
+          </div>
+        </div>
+        <div class="field">
+          <label>% of Income that's Recurring/Retainer (vs Project Work)</label>
+          <div class="slider-row">
+            <input type="range" id="recurring-r" min="0" max="100" step="5" value="60">
+            <span class="num-input" style="width:60px" id="recurring-i">60%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Current Savings</label>
+          <div class="slider-row">
+            <input type="range" id="savings-r" min="0" max="2000000" step="10000" value="200000">
+            <input class="num-input" id="savings-i" value="$200,000">
+          </div>
+        </div>
+        <div class="field">
+          <label>Monthly Savings Rate</label>
+          <div class="slider-row">
+            <input type="range" id="rate-r" min="0" max="50000" step="1000" value="15000">
+            <input class="num-input" id="rate-i" value="$15,000">
+          </div>
+        </div>
+        
+        <div class="div"></div>
+        <div class="split">
+          <div class="split-item">
+            <h4>Recurring Income</h4>
+            <div class="split-value" style="color:var(--green)" id="recurring-amt">—</div>
+            <div class="split-sub">Retainer work</div>
+          </div>
+          <div class="split-item">
+            <h4>Project Income</h4>
+            <div class="split-value" style="color:var(--amber)" id="project-amt">—</div>
+            <div class="split-sub">Variable work</div>
+          </div>
+        </div>
+
+        <div class="scenario">
+          <h4>⚠️ "50% Income Drop" Scenario</h4>
+          <div class="scenario-row">
+            <span>If one major retainer falls apart:</span>
+            <span id="drop-income">—</span>
+          </div>
+          <div class="scenario-row">
+            <span>Monthly runway available:</span>
+            <span id="runway-months">—</span>
+          </div>
+        </div>
+
+        <div class="div"></div>
+        <div class="section" style="color:var(--muted)">Savings Target Breakdown</div>
+        <div class="trow"><span class="tc">All-in boat purchase</span><span class="tv" id="t-purchase">—</span></div>
+        <div class="trow"><span class="tc">12-month emergency fund</span><span class="tv" id="t-emergency">—</span></div>
+        <div class="trow"><span class="tc">"Oh shit" fund</span><span class="tv">$50,000</span></div>
+        <div class="trow total"><span class="tc">Total Target</span><span class="tv" id="t-total">—</span></div>
+        
+        <div style="margin-top:14px">
+          <div class="prog-meta"><span>Progress to target</span><span id="prog-pct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%;background:var(--accent)"></div></div>
+          <div class="prog-sub"><span id="prog-label">$0 of $0</span><span id="prog-gap" style="color:var(--amber)">$0 gap</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- Lifestyle Mode -->
+      <div class="card">
+        <div class="section">Section 2: Lifestyle Mode</div>
+        <div class="tabs">
+          <button class="tab" onclick="setMode('marina')">🏙️ Marina Base</button>
+          <button class="tab" onclick="setMode('anchor')">⚓ Anchor Base</button>
+          <button class="tab on" onclick="setMode('coastal')">🌊 Coastal Cruising</button>
+          <button class="tab" onclick="setMode('bluewater')">🌍 Blue Water Passage</button>
+        </div>
+        <div class="field">
+          <label>Primary Region</label>
+          <select id="region-sel" onchange="state.region=this.value;update()">
+            <option value="se-asia">SE Asia (×0.6)</option>
+            <option value="med">Mediterranean off-season (×0.85)</option>
+            <option value="caribbean" selected>Caribbean (×1.15)</option>
+            <option value="us">US/EU Coasts (×1.75)</option>
+            <option value="pacific">Pacific (×1.25)</option>
+          </select>
+        </div>
+        <div class="div"></div>
+        <div id="budget-rows"></div>
+        <div class="btotal">
+          <span class="bl">Monthly Total</span>
+          <span class="bv" id="monthly-total">—</span>
+        </div>
+        <div class="btotal" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1)">
+          <span class="bl">Annual Total</span>
+          <span class="bv" id="annual-total" style="font-size:16px">—</span>
+        </div>
+      </div>
+
+      <!-- Skills & Life Logistics -->
+      <div class="card">
+        <div class="section">Section 4: Readiness Checklist</div>
+        
+        <div class="check-group">
+          <h4>Skills (tick what you've completed)</h4>
+          <div class="skill-check">
+            <input type="checkbox" id="skill-asa104" checked onchange="updateSkills()">
+            <label for="skill-asa104">ASA 104 ✅ (you already have this)</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="skill-offshore" onchange="updateSkills()">
+            <label for="skill-offshore">Offshore passage experience</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="skill-liveaboard" onchange="updateSkills()">
+            <label for="skill-liveaboard">Long-term liveaboard trial</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="skill-systems" onchange="updateSkills()">
+            <label for="skill-systems">Boat systems knowledge (diesel, electrical, plumbing)</label>
+          </div>
+        </div>
+
+        <div class="check-group">
+          <h4>Life Logistics</h4>
+          <div class="skill-check">
+            <input type="checkbox" id="life-bonnie" onchange="updateSkills()">
+            <label for="life-bonnie">Bonnie vet/quarantine research done</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="life-health" onchange="updateSkills()">
+            <label for="life-health">Expat health insurance researched</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="life-partner" onchange="updateSkills()">
+            <label for="life-partner">Partner situation resolved</label>
+          </div>
+          <div class="skill-check">
+            <input type="checkbox" id="life-parents" onchange="updateSkills()">
+            <label for="life-parents">Parents situation stable</label>
+          </div>
+        </div>
+
+        <div class="div"></div>
+        <div id="financial-checks"></div>
+      </div>
+    </div>
+
+    <!-- FULL WIDTH: Timeline -->
+    <div class="card full">
+      <div class="section">Section 5: Timeline & Summary</div>
+      <div class="tbox">
+        <div class="tbox-item">
+          <div class="tlbl">Months to Financially Ready</div>
+          <div class="tval" id="tl-months">—</div>
+          <div class="tsub" id="tl-date">—</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Target Date</div>
+          <div class="tval" id="tl-target">—</div>
+          <div class="tsub">based on current savings rate</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Annual Income Required</div>
+          <div class="tval" id="tl-req">—</div>
+          <div class="tsub">cruising budget + 30% buffer</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Income Surplus/Deficit</div>
+          <div class="tval" id="tl-delta">—</div>
+          <div class="tsub">vs your current income</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Recurring % Needed</div>
+          <div class="tval" id="tl-recurring">—</div>
+          <div class="tsub">for sustainability</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Built from your real research: financial planner questions, cruiser cost data, boat preferences, and comparison analysis. Updated February 2026.
+</footer>
+
+<script>
+const state = {
+  boat: 'sp-cruiser',
+  boatPrice: 225000,
+  addons: [
+    { id:'survey',       label:'Pre-purchase survey + haul-out',      cost:1200,  on:true },
+    { id:'delivery',     label:'Delivery/transport',                 cost:15000, on:true },
+    { id:'refit',        label:'Initial refit & repairs',            cost:35000, on:true },
+    { id:'electronics',  label:'Electronics upgrades',              cost:15000, on:true },
+    { id:'safety',       label:'Safety equipment',                  cost:8000,  on:true },
+    { id:'dinghy',       label:'Dinghy & outboard',                 cost:5000,  on:true },
+    { id:'tools',        label:'Tools & spare parts',               cost:5000,  on:true },
+    { id:'provisioning', label:'Initial provisioning',              cost:3000,  on:true },
+    { id:'docs',         label:'Documentation & insurance',         cost:1500,  on:true },
+  ],
+  mode: 'coastal',
+  region: 'caribbean',
+  income: 500000,
+  recurringPct: 60,
+  savings: 200000,
+  rate: 15000,
+};
+
+// Jordan's specific boat options with actual price ranges from research
+const BOATS = {
+  'sp-cruiser': { min: 199000, max: 254000, name: 'Island Packet SP Cruiser' },
+  'ip420':      { min: 180000, max: 280000, name: 'Island Packet 420' },
+  'ip440':      { min: 250000, max: 380000, name: 'Island Packet 440' },
+  'leopard40':  { min: 200000, max: 350000, name: 'Leopard 40' },
+  'custom':     { min: 150000, max: 400000, name: 'Custom' },
+};
+
+// Jordan's actual lifestyle modes from the planner, not generic budget/comfortable/luxury
+const MODES = {
+  marina: {
+    name: '🏙️ Marina Base',
+    desc: 'Docked, full amenities',
+    maintenance: 600, marinas: 1500, food: 1200, fuel: 150,
+    bonnie: 250, starlink: 165, health: 400, travel: 200, misc: 300
+  },
+  anchor: {
+    name: '⚓ Anchor Base', 
+    desc: 'Anchored long-term, occasional marina',
+    maintenance: 500, marinas: 300, food: 1000, fuel: 100,
+    bonnie: 250, starlink: 165, health: 400, travel: 200, misc: 250
+  },
+  coastal: {
+    name: '🌊 Coastal Cruising',
+    desc: 'Day hops, marinas 1-2x/week', 
+    maintenance: 650, marinas: 700, food: 1300, fuel: 200,
+    bonnie: 250, starlink: 165, health: 400, travel: 300, misc: 350
+  },
+  bluewater: {
+    name: '🌍 Blue Water Passage',
+    desc: 'Ocean crossings',
+    maintenance: 800, marinas: 400, food: 1400, fuel: 300,
+    bonnie: 250, starlink: 165, health: 400, travel: 400, misc: 400
+  }
+};
+
+// Regional multipliers from research
+const MULTS = { 'se-asia':0.6, med:0.85, caribbean:1.15, us:1.75, pacific:1.25 };
+const REGION_LBL = { 'se-asia':'SE Asia', med:'Mediterranean', caribbean:'Caribbean', us:'US/EU Coasts', pacific:'Pacific' };
+
+// Fixed costs that don't vary by region (Jordan's specific items)
+const FIXED_CATS = new Set(['bonnie','starlink','health','travel']);
+
+const CAT_LBL = {
+  maintenance:'Boat maintenance', marinas:'Marinas/moorings',
+  food:'Food & dining', fuel:'Fuel',
+  bonnie:'Bonnie (dog) — vet, health certs, food', 
+  starlink:'Starlink — $165/mo default',
+  health:'Expat health insurance — $400/mo (US citizen abroad)',
+  travel:'Travel (flights home)', misc:'Misc'
+};
+
+function fmt(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e5) return '$' + Math.round(n/1000) + 'K';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtFull(n) { return '$' + Math.round(n).toLocaleString(); }
+function parseNum(s) { return parseInt(s.replace(/[$,]/g,'')) || 0; }
+
+function selectBoat() {
+  const boat = document.getElementById('boat-sel').value;
+  state.boat = boat;
+  const range = BOATS[boat];
+  const midpoint = Math.round((range.min + range.max) / 2);
+  
+  // Update slider range and default value
+  const slider = document.getElementById('boat-r');
+  slider.min = range.min;
+  slider.max = range.max;
+  slider.value = midpoint;
+  state.boatPrice = midpoint;
+  
+  document.getElementById('boat-i').value = fmtFull(midpoint);
+  update();
+}
+
+function compute() {
+  const addonTotal = state.addons.filter(a=>a.on).reduce((s,a)=>s+a.cost, 0);
+  const purchaseTotal = state.boatPrice + addonTotal;
+
+  const mode = MODES[state.mode];
+  const mult = MULTS[state.region];
+  const monthly = {};
+  for (const [k,v] of Object.entries(mode)) {
+    if (k === 'name' || k === 'desc') continue;
+    monthly[k] = FIXED_CATS.has(k) ? v : Math.round(v * mult);
+  }
+  const monthlyTotal = Object.values(monthly).reduce((s,v)=>s+v, 0);
+  const annualBudget = monthlyTotal * 12;
+
+  const emergencyFund = monthlyTotal * 12;
+  const ohShit = 50000;
+  const target = purchaseTotal + emergencyFund + ohShit;
+  const gap = Math.max(0, target - state.savings);
+  const months = state.rate > 0 ? Math.ceil(gap / state.rate) : (gap > 0 ? Infinity : 0);
+
+  const incomeReq = Math.round(annualBudget * 1.3);
+  const recurringAmt = Math.round(state.income * state.recurringPct / 100);
+  const projectAmt = state.income - recurringAmt;
+  
+  // 50% income drop scenario
+  const dropIncome = Math.round(state.income * 0.5);
+  const runwayMonths = dropIncome > 0 ? Math.floor(state.savings / (monthlyTotal || 1)) : 0;
+  
+  // Financial checks
+  const incomeOk = state.income >= incomeReq;
+  const boatRatio = state.boatPrice / (state.income || 1);
+  const boatOk = boatRatio <= 3.5;
+  const coversPurchase = state.savings >= purchaseTotal;
+  const coversEmergency = state.savings >= purchaseTotal + emergencyFund;
+  
+  // Recurring income coverage
+  const recurringCoverage = monthlyTotal > 0 ? (recurringAmt / 12) / monthlyTotal : 0;
+  const runway6mo = dropIncome / 12 >= monthlyTotal * 6;
+
+  return {
+    addonTotal, purchaseTotal,
+    monthly, monthlyTotal, annualBudget,
+    emergencyFund, ohShit, target, gap, months,
+    incomeReq, incomeOk, boatRatio, boatOk,
+    coversPurchase, coversEmergency,
+    recurringAmt, projectAmt, dropIncome, runwayMonths,
+    recurringCoverage, runway6mo
+  };
+}
+
+function renderAddons() {
+  document.getElementById('addon-list').innerHTML = state.addons.map(a => `
+    <label class="addon">
+      <div style="display:flex;align-items:center">
+        <input type="checkbox" ${a.on?'checked':''} onchange="toggleAddon('${a.id}',this.checked)">
+        <span class="aname">${a.label}</span>
+      </div>
+      <span class="acost">${fmtFull(a.cost)}</span>
+    </label>
+  `).join('');
+}
+
+function toggleAddon(id, val) {
+  state.addons.find(a=>a.id===id).on = val;
+  update();
+}
+
+function setMode(m) {
+  state.mode = m;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelector(`[onclick="setMode('${m}')"]`).classList.add('on');
+  update();
+}
+
+function updateSkills() {
+  // Just trigger update, skills are checked in the compute phase
+  update();
+}
+
+function bindSlider(rangeId, inputId, stateKey, min, max) {
+  const r = document.getElementById(rangeId);
+  const i = document.getElementById(inputId);
+  r.addEventListener('input', () => {
+    state[stateKey] = parseInt(r.value);
+    if (stateKey === 'recurringPct') {
+      i.textContent = state[stateKey] + '%';
+    } else {
+      i.value = fmtFull(state[stateKey]);
+    }
+    update();
+  });
+  if (inputId !== 'recurring-i') {
+    i.addEventListener('change', () => {
+      const v = Math.max(min, Math.min(max, parseNum(i.value)));
+      state[stateKey] = v;
+      r.value = v;
+      i.value = fmtFull(v);
+      update();
+    });
+  }
+}
+
+function update() {
+  const d = compute();
+
+  // Summary bar
+  document.getElementById('s-purchase').textContent = fmt(d.purchaseTotal);
+  document.getElementById('s-monthly').textContent = fmt(d.monthlyTotal);
+  
+  const tEl = document.getElementById('s-timeline');
+  if (d.months === 0) { tEl.textContent = 'Ready!'; tEl.className = 'val g'; }
+  else if (d.months === Infinity) { tEl.textContent = '∞'; tEl.className = 'val r'; }
+  else { tEl.textContent = d.months + ' mo'; tEl.className = 'val ' + (d.months<=12?'g':d.months<=36?'a':'r'); }
+
+  const rEl = document.getElementById('s-recurring');
+  if (d.recurringCoverage >= 1.0) { rEl.textContent = 'Covered'; rEl.className = 'val g'; }
+  else if (d.recurringCoverage >= 0.8) { rEl.textContent = Math.round(d.recurringCoverage*100) + '%'; rEl.className = 'val a'; }
+  else { rEl.textContent = Math.round(d.recurringCoverage*100) + '%'; rEl.className = 'val r'; }
+
+  // Purchase
+  document.getElementById('purchase-total').textContent = fmtFull(d.purchaseTotal);
+
+  // Budget rows
+  document.getElementById('budget-rows').innerHTML = Object.entries(d.monthly).map(([k,v]) =>
+    `<div class="brow"><span class="bc">${CAT_LBL[k]}</span><span class="ba">${fmtFull(v)}</span></div>`
+  ).join('');
+  document.getElementById('monthly-total').textContent = fmtFull(d.monthlyTotal);
+  document.getElementById('annual-total').textContent = fmtFull(d.annualBudget);
+
+  // Your numbers
+  document.getElementById('t-purchase').textContent = fmtFull(d.purchaseTotal);
+  document.getElementById('t-emergency').textContent = fmtFull(d.emergencyFund);
+  document.getElementById('t-total').textContent = fmtFull(d.target);
+
+  document.getElementById('recurring-amt').textContent = fmtFull(d.recurringAmt);
+  document.getElementById('project-amt').textContent = fmtFull(d.projectAmt);
+  document.getElementById('drop-income').textContent = fmtFull(d.dropIncome) + '/yr';
+  document.getElementById('runway-months').textContent = d.runwayMonths + ' months';
+
+  const pct = Math.min(100, Math.round((state.savings / d.target) * 100));
+  document.getElementById('prog-pct').textContent = pct + '%';
+  const fill = document.getElementById('prog-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--accent)';
+  document.getElementById('prog-label').textContent = `${fmtFull(state.savings)} of ${fmtFull(d.target)}`;
+  const gapEl = document.getElementById('prog-gap');
+  if (d.gap <= 0) { gapEl.textContent = '✓ Target met!'; gapEl.style.color = 'var(--green)'; }
+  else { gapEl.textContent = fmtFull(d.gap) + ' gap'; gapEl.style.color = 'var(--amber)'; }
+
+  // Financial checks
+  const checks = [
+    {
+      ok: d.incomeOk, warn: state.income >= d.annualBudget && !d.incomeOk,
+      title: 'Income covers cruising costs + 30% buffer',
+      detail: d.incomeOk
+        ? `✓ Your ${fmtFull(state.income)}/yr exceeds the ${fmtFull(d.incomeReq)}/yr requirement`
+        : `Need ${fmtFull(d.incomeReq)}/yr — you're ${fmtFull(d.incomeReq - state.income)} short`,
+    },
+    {
+      ok: d.boatOk, warn: d.boatRatio > 3.5 && d.boatRatio <= 5,
+      title: 'Boat price ≤ 3.5× annual income',
+      detail: d.boatOk
+        ? `✓ Boat is ${d.boatRatio.toFixed(1)}× your income — within safe range`
+        : `Boat is ${d.boatRatio.toFixed(1)}× income — recommend under 3.5×`,
+    },
+    {
+      ok: d.coversPurchase, warn: !d.coversPurchase && state.savings >= state.boatPrice,
+      title: 'Savings cover all-in purchase',
+      detail: d.coversPurchase
+        ? `✓ ${fmtFull(state.savings)} covers ${fmtFull(d.purchaseTotal)} all-in`
+        : `Need ${fmtFull(d.purchaseTotal - state.savings)} more for all-in cost`,
+    },
+    {
+      ok: d.coversEmergency, warn: d.coversPurchase && !d.coversEmergency,
+      title: '12-month emergency fund on top of purchase',
+      detail: d.coversEmergency
+        ? `✓ Savings cover purchase + ${fmtFull(d.emergencyFund)} emergency fund`
+        : `After purchase, you'd need ${fmtFull(d.emergencyFund)} emergency fund`,
+    },
+    {
+      ok: d.recurringCoverage >= 1.0, warn: d.recurringCoverage >= 0.8,
+      title: 'Recurring income alone covers cruising budget',
+      detail: `${Math.round(d.recurringCoverage*100)}% coverage — ${fmtFull(d.recurringAmt/12)}/mo recurring vs ${fmtFull(d.monthlyTotal)}/mo needed`,
+    },
+    {
+      ok: d.runway6mo, warn: d.runwayMonths >= 3,
+      title: '6+ month runway if income drops 50%',
+      detail: `At 50% income (${fmtFull(d.dropIncome)}/yr), you'd have ${d.runwayMonths} months runway`,
+    }
+  ];
+  
+  document.getElementById('financial-checks').innerHTML = checks.map(c => {
+    const cls = c.ok ? 'p' : c.warn ? 'w' : 'f';
+    const icon = c.ok ? '✅' : c.warn ? '⚠️' : '❌';
+    return `<div class="check ${cls}"><span class="check-icon">${icon}</span><div><div class="check-title">${c.title}</div><div class="check-detail">${c.detail}</div></div></div>`;
+  }).join('');
+
+  // Timeline
+  if (d.months === 0) {
+    document.getElementById('tl-months').textContent = 'Ready Now!';
+    document.getElementById('tl-date').textContent = 'Target already met';
+    document.getElementById('tl-target').textContent = '🎉';
+  } else if (d.months === Infinity) {
+    document.getElementById('tl-months').textContent = '∞';
+    document.getElementById('tl-date').textContent = 'Set savings rate';
+    document.getElementById('tl-target').textContent = '—';
+  } else {
+    const now = new Date();
+    const then = new Date(now.getFullYear(), now.getMonth() + d.months, 1);
+    document.getElementById('tl-months').textContent = d.months;
+    document.getElementById('tl-date').textContent = 'at current rate';
+    document.getElementById('tl-target').textContent = then.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  }
+  
+  document.getElementById('tl-req').textContent = fmtFull(d.incomeReq);
+  const incDelta = state.income - d.incomeReq;
+  const tld = document.getElementById('tl-delta');
+  tld.textContent = (incDelta >= 0 ? '+' : '') + fmtFull(incDelta);
+  tld.style.color = incDelta >= 0 ? 'var(--green)' : 'var(--red)';
+  
+  const recReq = Math.round((d.monthlyTotal * 12) / (state.income || 1) * 100);
+  document.getElementById('tl-recurring').textContent = recReq + '%';
+}
+
+// Init
+renderAddons();
+bindSlider('boat-r', 'boat-i', 'boatPrice', 150000, 400000);
+bindSlider('income-r', 'income-i', 'income', 100000, 2000000);
+bindSlider('recurring-r', 'recurring-i', 'recurringPct', 0, 100);
+bindSlider('savings-r', 'savings-i', 'savings', 0, 2000000);
+bindSlider('rate-r', 'rate-i', 'rate', 0, 50000);
+
+// Set initial boat selection
+selectBoat();
+update();
+</script>
+</body>
+</html>
