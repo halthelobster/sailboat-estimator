@@ -343,6 +343,71 @@
 <div class="page">
   <div class="cols">
 
+    <!-- FULL WIDTH: Timeline & Summary (top) -->
+    <div class="card full">
+      <div class="section">Timeline & Summary</div>
+      
+      <!-- FEATURE 3: Reverse Calculator -->
+      <div class="reverse-calc">
+        <h4>🎯 "Leave By" Reverse Calculator</h4>
+        <div class="field">
+          <label>Target departure year</label>
+          <select id="target-year" onchange="updateReverseCalculator()">
+            <option value="2026">2026</option>
+            <option value="2027" selected>2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">MONTHS REMAINING</div>
+            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-months-remaining">—</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">REQUIRED SAVINGS/MONTH</div>
+            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-required-savings">—</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px;padding:10px;border-radius:6px" id="reverse-feasibility">
+          <div style="font-size:12px;font-weight:600" id="reverse-message">—</div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">
+          At your current rate of <span id="current-savings-rate">—</span>/mo, you'll be ready in <span id="current-ready-date">—</span>
+        </div>
+      </div>
+      
+      <div class="tbox">
+        <div class="tbox-item">
+          <div class="tlbl">Months to Financially Ready</div>
+          <div class="tval" id="tl-months">—</div>
+          <div class="tsub" id="tl-date">—</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Target Date</div>
+          <div class="tval" id="tl-target">—</div>
+          <div class="tsub">based on current savings rate</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Annual Income Required</div>
+          <div class="tval" id="tl-req">—</div>
+          <div class="tsub">gross income (pre-tax)</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Income Surplus/Deficit</div>
+          <div class="tval" id="tl-delta">—</div>
+          <div class="tsub">vs your current income</div>
+        </div>
+        <div class="tbox-item">
+          <div class="tlbl">Recurring % Needed</div>
+          <div class="tval" id="tl-recurring">—</div>
+          <div class="tsub">for sustainability</div>
+        </div>
+      </div>
+    </div>
+
     <!-- LEFT COLUMN -->
     <div>
       <!-- Your Boat -->
@@ -837,69 +902,6 @@
       </div>
     </div>
 
-    <!-- FULL WIDTH: Timeline -->
-    <div class="card full">
-      <div class="section">Section 5: Timeline & Summary</div>
-      
-      <!-- FEATURE 3: Reverse Calculator -->
-      <div class="reverse-calc">
-        <h4>🎯 "Leave By" Reverse Calculator</h4>
-        <div class="field">
-          <label>Target departure year</label>
-          <select id="target-year" onchange="updateReverseCalculator()">
-            <option value="2026">2026</option>
-            <option value="2027" selected>2027</option>
-            <option value="2028">2028</option>
-            <option value="2029">2029</option>
-            <option value="2030">2030</option>
-            <option value="2031">2031</option>
-          </select>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
-          <div style="text-align:center">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">MONTHS REMAINING</div>
-            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-months-remaining">—</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">REQUIRED SAVINGS/MONTH</div>
-            <div style="font-size:16px;font-weight:700;color:var(--amber)" id="reverse-required-savings">—</div>
-          </div>
-        </div>
-        <div style="text-align:center;margin-top:12px;padding:10px;border-radius:6px" id="reverse-feasibility">
-          <div style="font-size:12px;font-weight:600" id="reverse-message">—</div>
-        </div>
-        <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">
-          At your current rate of <span id="current-savings-rate">—</span>/mo, you'll be ready in <span id="current-ready-date">—</span>
-        </div>
-      </div>
-      
-      <div class="tbox">
-        <div class="tbox-item">
-          <div class="tlbl">Months to Financially Ready</div>
-          <div class="tval" id="tl-months">—</div>
-          <div class="tsub" id="tl-date">—</div>
-        </div>
-        <div class="tbox-item">
-          <div class="tlbl">Target Date</div>
-          <div class="tval" id="tl-target">—</div>
-          <div class="tsub">based on current savings rate</div>
-        </div>
-        <div class="tbox-item">
-          <div class="tlbl">Annual Income Required</div>
-          <div class="tval" id="tl-req">—</div>
-          <div class="tsub">gross income (pre-tax)</div>
-        </div>
-        <div class="tbox-item">
-          <div class="tlbl">Income Surplus/Deficit</div>
-          <div class="tval" id="tl-delta">—</div>
-          <div class="tsub">vs your current income</div>
-        </div>
-        <div class="tbox-item">
-          <div class="tlbl">Recurring % Needed</div>
-          <div class="tval" id="tl-recurring">—</div>
-          <div class="tsub">for sustainability</div>
-        </div>
-      </div>
     </div>
 
   </div>
