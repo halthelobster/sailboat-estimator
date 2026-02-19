@@ -774,36 +774,128 @@
           <span class="bv" id="annual-total" style="font-size:16px">—</span>
         </div>
         
-        <!-- FEATURE 5: SF Cost Offset -->
+        <!-- FEATURE 5: Full Cost of Living Comparison: SF vs Sailing -->
         <div class="sf-offset">
-          <h4>🌁 What you're escaping (SF costs)</h4>
+          <h4>🌁 Full Cost of Living Comparison: SF vs Sailing Life</h4>
+          
+          <div style="font-size:11px;color:var(--accent);font-weight:600;letter-spacing:0.8px;margin-bottom:12px">SF MONTHLY COSTS</div>
+          
           <div class="field">
-            <label>Current rent/mortgage</label>
+            <label>Rent / mortgage</label>
             <div class="slider-row">
               <input type="range" id="sf-rent-r" min="2000" max="8000" step="100" value="3200" oninput="updateSFCosts()">
-              <input class="num-input" id="sf-rent-i" value="$3,200" style="width:80px">
+              <input class="num-input" id="sf-rent-i" value="$3,200" style="width:80px" oninput="updateSFCostsFromInput('sfRent', this.value)">
             </div>
           </div>
+          
           <div class="field">
-            <label>Car payment + insurance + gas</label>
+            <label>Food (groceries + restaurants)</label>
+            <div class="slider-row">
+              <input type="range" id="sf-food-r" min="800" max="3000" step="50" value="1800" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-food-i" value="$1,800" style="width:80px" oninput="updateSFCostsFromInput('sfFood', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>Car (payment + insurance + gas)</label>
             <div class="slider-row">
               <input type="range" id="sf-car-r" min="300" max="1500" step="50" value="800" oninput="updateSFCosts()">
-              <input class="num-input" id="sf-car-i" value="$800" style="width:80px">
+              <input class="num-input" id="sf-car-i" value="$800" style="width:80px" oninput="updateSFCostsFromInput('sfCar', this.value)">
             </div>
           </div>
+          
           <div class="field">
-            <label>CA state income tax rate</label>
+            <label>Health insurance</label>
+            <div class="slider-row">
+              <input type="range" id="sf-health-r" min="400" max="1500" step="25" value="950" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-health-i" value="$950" style="width:80px" oninput="updateSFCostsFromInput('sfHealthInsurance', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>Internet</label>
+            <div class="slider-row">
+              <input type="range" id="sf-internet-r" min="50" max="300" step="10" value="150" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-internet-i" value="$150" style="width:80px" oninput="updateSFCostsFromInput('sfInternet', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>Utilities (electric, gas, water)</label>
+            <div class="slider-row">
+              <input type="range" id="sf-utilities-r" min="100" max="400" step="10" value="200" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-utilities-i" value="$200" style="width:80px" oninput="updateSFCostsFromInput('sfUtilities', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>Entertainment / activities</label>
+            <div class="slider-row">
+              <input type="range" id="sf-entertainment-r" min="200" max="1000" step="25" value="400" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-entertainment-i" value="$400" style="width:80px" oninput="updateSFCostsFromInput('sfEntertainment', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>Other / miscellaneous</label>
+            <div class="slider-row">
+              <input type="range" id="sf-other-r" min="100" max="800" step="25" value="300" oninput="updateSFCosts()">
+              <input class="num-input" id="sf-other-i" value="$300" style="width:80px" oninput="updateSFCostsFromInput('sfOther', this.value)">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>CA income tax rate</label>
             <div class="slider-row">
               <input type="range" id="ca-tax-r" min="0" max="15" step="0.1" value="9.3" oninput="updateSFCosts()">
               <span class="num-input" style="width:70px" id="ca-tax-i">9.3%</span>
             </div>
           </div>
+          
+          <div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:8px;margin:12px 0;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:2px">SF MONTHLY TOTAL</div>
+            <div style="font-size:16px;font-weight:700;color:var(--accent)" id="sf-monthly-total">—</div>
+          </div>
+          
           <div class="div"></div>
-          <div class="trow"><span class="tc">Monthly costs eliminated</span><span class="tv" id="sf-costs-eliminated">—</span></div>
-          <div class="trow"><span class="tc">Annual CA tax savings (monthly)</span><span class="tv" id="ca-tax-savings">—</span></div>
-          <div class="trow total"><span class="tc">Total monthly costs eliminated</span><span class="tv" id="total-sf-eliminated">—</span></div>
-          <div style="text-align:center;margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:6px;">
-            <div style="font-size:13px;font-weight:600;color:var(--accent)" id="net-lifestyle-cost">—</div>
+          <div style="font-size:11px;color:var(--accent);font-weight:600;letter-spacing:0.8px;margin-bottom:12px">COMPARISON TABLE</div>
+          
+          <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:12px;">
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <th style="text-align:left;padding:8px 4px;color:var(--muted);font-weight:600;">Category</th>
+                  <th style="text-align:right;padding:8px 4px;color:var(--muted);font-weight:600;">SF</th>
+                  <th style="text-align:right;padding:8px 4px;color:var(--muted);font-weight:600;">Sailing</th>
+                </tr>
+              </thead>
+              <tbody id="comparison-table-body">
+                <!-- Populated by JavaScript -->
+              </tbody>
+              <tfoot>
+                <tr style="border-top:2px solid var(--border);font-weight:700;">
+                  <td style="padding:8px 4px;color:var(--text);">TOTAL</td>
+                  <td style="text-align:right;padding:8px 4px;color:var(--accent);" id="sf-total-cell">—</td>
+                  <td style="text-align:right;padding:8px 4px;color:var(--accent);" id="sailing-total-cell">—</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 4px;color:var(--text);font-weight:700;">Monthly Difference</td>
+                  <td colspan="2" style="text-align:right;padding:4px 4px;font-weight:700;" id="monthly-difference-cell">—</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          
+          <div style="text-align:center;margin-top:12px;padding:12px;background:rgba(59,157,232,0.07);border:1px solid rgba(59,157,232,0.2);border-radius:8px;">
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;" id="key-insight">—</div>
+          </div>
+          
+          <div style="text-align:center;margin-top:8px;padding:10px;background:rgba(46,204,113,0.07);border:1px solid rgba(46,204,113,0.2);border-radius:6px;">
+            <div style="font-size:12px;font-weight:600;color:var(--green);" id="ca-tax-insight">—</div>
+          </div>
+          
+          <div style="text-align:center;margin-top:8px;padding:10px;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.2);border-radius:6px;">
+            <div style="font-size:12px;font-weight:600;color:var(--amber);">SF health insurance ($950/mo) vs expat coverage ($350/mo typical) = $7,200/year savings just on health</div>
           </div>
         </div>
       </div>
@@ -964,9 +1056,15 @@ const state = {
   loanTermYears: 15,
   // FEATURE 4: Concentration Risk
   concentrationPct: 60,
-  // FEATURE 5: SF Cost Offset
+  // FEATURE 5: SF Cost Offset - Full Cost of Living Comparison
   sfRent: 3200,
+  sfFood: 1800,
   sfCar: 800,
+  sfHealthInsurance: 950,
+  sfInternet: 150,
+  sfUtilities: 200,
+  sfEntertainment: 400,
+  sfOther: 300,
   caTaxRate: 9.3,
   // FEATURE 6: Resale Value
   yearsSelling: 7,
@@ -1138,15 +1236,50 @@ function updateConcentration() {
   update();
 }
 
-// FEATURE 5: SF Cost Offset
+// FEATURE 5: SF Cost Offset - Full Cost of Living Comparison
 function updateSFCosts() {
   state.sfRent = parseInt(document.getElementById('sf-rent-r').value);
+  state.sfFood = parseInt(document.getElementById('sf-food-r').value);
   state.sfCar = parseInt(document.getElementById('sf-car-r').value);
+  state.sfHealthInsurance = parseInt(document.getElementById('sf-health-r').value);
+  state.sfInternet = parseInt(document.getElementById('sf-internet-r').value);
+  state.sfUtilities = parseInt(document.getElementById('sf-utilities-r').value);
+  state.sfEntertainment = parseInt(document.getElementById('sf-entertainment-r').value);
+  state.sfOther = parseInt(document.getElementById('sf-other-r').value);
   state.caTaxRate = parseFloat(document.getElementById('ca-tax-r').value);
   
   document.getElementById('sf-rent-i').value = '$' + state.sfRent.toLocaleString();
+  document.getElementById('sf-food-i').value = '$' + state.sfFood.toLocaleString();
   document.getElementById('sf-car-i').value = '$' + state.sfCar.toLocaleString();
+  document.getElementById('sf-health-i').value = '$' + state.sfHealthInsurance.toLocaleString();
+  document.getElementById('sf-internet-i').value = '$' + state.sfInternet.toLocaleString();
+  document.getElementById('sf-utilities-i').value = '$' + state.sfUtilities.toLocaleString();
+  document.getElementById('sf-entertainment-i').value = '$' + state.sfEntertainment.toLocaleString();
+  document.getElementById('sf-other-i').value = '$' + state.sfOther.toLocaleString();
   document.getElementById('ca-tax-i').textContent = state.caTaxRate + '%';
+  
+  update();
+}
+
+function updateSFCostsFromInput(stateKey, inputValue) {
+  const numValue = parseNum(inputValue);
+  state[stateKey] = numValue;
+  
+  // Update corresponding slider
+  const sliderMap = {
+    'sfRent': 'sf-rent-r',
+    'sfFood': 'sf-food-r', 
+    'sfCar': 'sf-car-r',
+    'sfHealthInsurance': 'sf-health-r',
+    'sfInternet': 'sf-internet-r',
+    'sfUtilities': 'sf-utilities-r',
+    'sfEntertainment': 'sf-entertainment-r',
+    'sfOther': 'sf-other-r'
+  };
+  
+  if (sliderMap[stateKey]) {
+    document.getElementById(sliderMap[stateKey]).value = numValue;
+  }
   
   update();
 }
@@ -1317,11 +1450,26 @@ function compute() {
   const cashMonths = state.rate > 0 ? Math.ceil(cashGap / state.rate) : (cashGap > 0 ? Infinity : 0);
   const financeMonths = state.rate > 0 ? Math.ceil(financeGap / state.rate) : (financeGap > 0 ? Infinity : 0);
 
-  // FEATURE 5: SF Cost Offset calculations
-  const sfCostsEliminated = state.sfRent + state.sfCar;
+  // FEATURE 5: SF Cost Offset - Full Cost of Living Comparison calculations
+  const sfMonthlyBase = state.sfRent + state.sfFood + state.sfCar + state.sfHealthInsurance + 
+                       state.sfInternet + state.sfUtilities + state.sfEntertainment + state.sfOther;
   const caTaxSavings = Math.round((state.income * state.caTaxRate / 100) / 12);
-  const totalSFEliminated = sfCostsEliminated + caTaxSavings;
-  const netLifestyleCost = monthlyTotal - totalSFEliminated;
+  const sfMonthlyTotal = sfMonthlyBase + caTaxSavings;
+  
+  // Map SF categories to sailing costs from monthly budget
+  const comparisonData = [
+    { category: 'Housing', sf: state.sfRent, sailing: monthly.marinas || 0 },
+    { category: 'Food', sf: state.sfFood, sailing: monthly.food || 0 },
+    { category: 'Car', sf: state.sfCar, sailing: 0 },
+    { category: 'Health Insurance', sf: state.sfHealthInsurance, sailing: monthly.health || 0 },
+    { category: 'Internet', sf: state.sfInternet, sailing: monthly.starlink || 0 },
+    { category: 'Utilities', sf: state.sfUtilities, sailing: (monthly.maintenance || 0) + (monthly.insurance || 0) + (monthly.fuel || 0) },
+    { category: 'Entertainment', sf: state.sfEntertainment, sailing: monthly.travel || 0 },
+    { category: 'Other', sf: state.sfOther, sailing: (monthly.misc || 0) + (monthly.bonnie || 0) }
+  ];
+  
+  const monthlyDifference = monthlyTotal - sfMonthlyTotal;
+  const netLifestyleCost = monthlyTotal - sfMonthlyTotal;
   
   // FEATURE 6: Resale calculations
   const resaleValue = Math.round(state.boatPrice * Math.pow(state.retentionRate / 100, state.yearsSelling / 10));
@@ -1361,8 +1509,8 @@ function compute() {
     availableForPurchase, emergencyBackstop,
     // FEATURE 4: Concentration
     topClientIncome, remainingIncome, clientLossRunway,
-    // FEATURE 5: SF offset
-    sfCostsEliminated, caTaxSavings, totalSFEliminated, netLifestyleCost,
+    // FEATURE 5: SF offset - Full Cost of Living Comparison
+    sfMonthlyBase, sfMonthlyTotal, caTaxSavings, comparisonData, monthlyDifference, netLifestyleCost,
     // FEATURE 6: Resale
     resaleValue, netBoatCost, annualizedBoatCost, netBoatCostFinanced, annualizedBoatCostFinanced, interestOverHorizon, rentComparison,
     // FEATURE 2: Exit scenario
@@ -1503,19 +1651,46 @@ function update() {
     document.getElementById('client-loss-runway').textContent = d.clientLossRunway + ' months';
   }
 
-  // FEATURE 5: SF Cost Offset updates
-  document.getElementById('sf-costs-eliminated').textContent = fmtFull(d.sfCostsEliminated);
-  document.getElementById('ca-tax-savings').textContent = fmtFull(d.caTaxSavings);
-  document.getElementById('total-sf-eliminated').textContent = fmtFull(d.totalSFEliminated);
+  // FEATURE 5: SF Cost Offset - Full Cost of Living Comparison updates
+  document.getElementById('sf-monthly-total').textContent = fmtFull(d.sfMonthlyTotal);
   
-  const netCostEl = document.getElementById('net-lifestyle-cost');
-  if (d.netLifestyleCost < 0) {
-    netCostEl.textContent = `Your sailboat lifestyle actually costs ${fmtFull(Math.abs(d.netLifestyleCost))}/mo LESS than SF`;
-    netCostEl.style.color = 'var(--green)';
+  // Populate comparison table
+  const tableBody = document.getElementById('comparison-table-body');
+  tableBody.innerHTML = d.comparisonData.map(row => `
+    <tr>
+      <td style="padding:4px 4px;color:var(--text);">${row.category}</td>
+      <td style="text-align:right;padding:4px 4px;color:var(--text);">${fmtFull(row.sf)}</td>
+      <td style="text-align:right;padding:4px 4px;color:var(--text);">${fmtFull(row.sailing)}</td>
+    </tr>
+  `).join('');
+  
+  document.getElementById('sf-total-cell').textContent = fmtFull(d.sfMonthlyTotal);
+  document.getElementById('sailing-total-cell').textContent = fmtFull(d.monthlyTotal);
+  
+  const diffCell = document.getElementById('monthly-difference-cell');
+  const diffAbs = Math.abs(d.monthlyDifference);
+  if (d.monthlyDifference < 0) {
+    diffCell.textContent = fmtFull(diffAbs) + '/mo LESS';
+    diffCell.style.color = 'var(--green)';
   } else {
-    netCostEl.textContent = `Net sailboat lifestyle cost: ${fmtFull(d.netLifestyleCost)}/mo MORE than SF`;
-    netCostEl.style.color = 'var(--amber)';
+    diffCell.textContent = fmtFull(diffAbs) + '/mo MORE';
+    diffCell.style.color = 'var(--red)';
   }
+  
+  // Key insight
+  const keyInsightEl = document.getElementById('key-insight');
+  if (d.monthlyDifference < 0) {
+    const annualSavings = Math.abs(d.monthlyDifference) * 12;
+    const threeYearSavings = annualSavings * 3;
+    keyInsightEl.textContent = `You'd spend ${fmtFull(diffAbs)}/mo LESS living aboard. That's ${fmtFull(annualSavings)}/year — or ${fmtFull(threeYearSavings)} over 3 years.`;
+  } else {
+    keyInsightEl.textContent = `Living aboard costs ${fmtFull(diffAbs)}/mo more than SF — but you gain freedom that money can't buy.`;
+  }
+  
+  // CA tax savings insight
+  const taxInsightEl = document.getElementById('ca-tax-insight');
+  const annualTaxSavings = d.caTaxSavings * 12;
+  taxInsightEl.textContent = `Leaving CA saves ~${fmtFull(annualTaxSavings)}/year in state income tax alone.`;
 
   // FEATURE 6: Resale value updates
   document.getElementById('resale-value').textContent = fmtFull(d.resaleValue);
@@ -1782,9 +1957,22 @@ updateIRA();
 updateRetirement();
 updateOtherAssets();
 
+// Set initial values for all SF cost sliders and inputs
+document.getElementById('sf-rent-r').value = state.sfRent;
+document.getElementById('sf-food-r').value = state.sfFood;
+document.getElementById('sf-car-r').value = state.sfCar;
+document.getElementById('sf-health-r').value = state.sfHealthInsurance;
+document.getElementById('sf-internet-r').value = state.sfInternet;
+document.getElementById('sf-utilities-r').value = state.sfUtilities;
+document.getElementById('sf-entertainment-r').value = state.sfEntertainment;
+document.getElementById('sf-other-r').value = state.sfOther;
+document.getElementById('ca-tax-r').value = state.caTaxRate;
+
 // Set initial boat selection
 selectBoat();
 update();
+// Show financing inputs if default payment method is finance
+setPaymentMethod(state.paymentMethod);
 </script>
 <script>
 function loadScenario(input) {
