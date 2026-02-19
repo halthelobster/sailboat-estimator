@@ -536,8 +536,15 @@
             </div>
             <div class="div"></div>
             <div class="trow"><span class="tc">Estimated resale value in <span id="resale-years">7</span> years</span><span class="tv" id="resale-value">—</span></div>
-            <div class="trow"><span class="tc">Net cost of boat ownership</span><span class="tv" id="net-boat-cost">—</span></div>
+            <div class="trow"><span class="tc">Net cost (purchase − resale)</span><span class="tv" id="net-boat-cost">—</span></div>
             <div class="trow"><span class="tc">Annualized true boat cost</span><span class="tv" id="annualized-cost">—</span></div>
+            <div id="finance-resale-rows" style="display:none">
+              <div style="height:1px;background:var(--border);margin:8px 0"></div>
+              <div style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:0.8px;margin-bottom:4px">WITH FINANCING</div>
+              <div class="trow"><span class="tc">+ Total interest paid</span><span class="tv" style="color:var(--amber)" id="resale-interest-paid">—</span></div>
+              <div class="trow"><span class="tc">True net cost (incl. interest)</span><span class="tv" style="color:var(--amber)" id="net-boat-cost-financed">—</span></div>
+              <div class="trow"><span class="tc">Annualized (incl. interest)</span><span class="tv" style="color:var(--amber)" id="annualized-cost-financed">—</span></div>
+            </div>
             <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">
               Compare to rent: $3,200/mo × 12 × <span id="rent-years">7</span> years = <span id="rent-comparison">—</span> in rent with nothing to show
             </div>
@@ -1314,6 +1321,10 @@ function compute() {
   const resaleValue = Math.round(state.boatPrice * Math.pow(state.retentionRate / 100, state.yearsSelling / 10));
   const netBoatCost = purchaseTotal - resaleValue;
   const annualizedBoatCost = Math.round(netBoatCost / state.yearsSelling);
+  // Finance-adjusted: true cost includes total interest paid over loan term
+  const interestOverHorizon = state.paymentMethod === 'finance' ? totalInterest : 0;
+  const netBoatCostFinanced = purchaseTotal + interestOverHorizon - resaleValue;
+  const annualizedBoatCostFinanced = Math.round(netBoatCostFinanced / state.yearsSelling);
   const rentComparison = 3200 * 12 * state.yearsSelling;
   
   // FEATURE 2: Exit scenario calculations
@@ -1347,7 +1358,7 @@ function compute() {
     // FEATURE 5: SF offset
     sfCostsEliminated, caTaxSavings, totalSFEliminated, netLifestyleCost,
     // FEATURE 6: Resale
-    resaleValue, netBoatCost, annualizedBoatCost, rentComparison,
+    resaleValue, netBoatCost, annualizedBoatCost, netBoatCostFinanced, annualizedBoatCostFinanced, interestOverHorizon, rentComparison,
     // FEATURE 2: Exit scenario
     netFromBoatSale, transitionCost, netExitPosition,
     // FEATURE 3: Reverse calculator
@@ -1504,6 +1515,16 @@ function update() {
   document.getElementById('resale-value').textContent = fmtFull(d.resaleValue);
   document.getElementById('net-boat-cost').textContent = fmtFull(d.netBoatCost);
   document.getElementById('annualized-cost').textContent = fmtFull(d.annualizedBoatCost) + '/yr';
+  // Finance-adjusted resale rows
+  const financeResaleRows = document.getElementById('finance-resale-rows');
+  if (state.paymentMethod === 'finance' && d.interestOverHorizon > 0) {
+    financeResaleRows.style.display = 'block';
+    document.getElementById('resale-interest-paid').textContent = '+' + fmtFull(d.interestOverHorizon);
+    document.getElementById('net-boat-cost-financed').textContent = fmtFull(d.netBoatCostFinanced);
+    document.getElementById('annualized-cost-financed').textContent = fmtFull(d.annualizedBoatCostFinanced) + '/yr';
+  } else {
+    financeResaleRows.style.display = 'none';
+  }
   document.getElementById('rent-comparison').textContent = fmtFull(d.rentComparison);
 
   // FEATURE 2: Exit scenario updates
