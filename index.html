@@ -1994,16 +1994,16 @@ function loadScenario(input) {
       const syncEl = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
       syncEl('boat-price-r', state.boatPrice); syncEl('boat-price-i', state.boatPrice);
       syncEl('down-payment-r', state.downPaymentPct); syncEl('down-payment-i', state.downPaymentPct);
-      syncEl('interest-rate-r', state.loanInterestRate); syncEl('interest-rate-i', state.loanInterestRate);
-      syncEl('income-r', state.annualIncome); syncEl('income-i', state.annualIncome);
+      syncEl('interest-rate-r', state.interestRate); syncEl('interest-rate-i', state.interestRate);
+      syncEl('income-r', state.income); syncEl('income-i', state.income);
       syncEl('recurring-r', state.recurringPct); syncEl('recurring-i', state.recurringPct);
-      syncEl('savings-rate-r', state.monthlySavingsRate); syncEl('savings-rate-i', state.monthlySavingsRate);
+      syncEl('savings-rate-r', state.rate); syncEl('savings-rate-i', state.rate);
       syncEl('tax-rate-r', state.taxRate); syncEl('tax-rate-i', state.taxRate);
-      syncEl('top-client-r', state.topClientPct); syncEl('top-client-i', state.topClientPct);
+      syncEl('top-client-r', state.concentrationPct); syncEl('top-client-i', state.concentrationPct);
       syncEl('liquid-savings-r', state.liquidSavings); syncEl('liquid-savings-i', state.liquidSavings);
-      syncEl('brokerage-savings-r', state.brokerageSavings); syncEl('brokerage-savings-i', state.brokerageSavings);
-      syncEl('ira-savings-r', state.iraSavings); syncEl('ira-savings-i', state.iraSavings);
-      syncEl('retirement-401k-r', state.retirement401k); syncEl('retirement-401k-i', state.retirement401k);
+      syncEl('brokerage-savings-r', state.brokerage); syncEl('brokerage-savings-i', state.brokerage);
+      syncEl('ira-savings-r', state.ira); syncEl('ira-savings-i', state.ira);
+      syncEl('retirement-401k-r', state.retirement); syncEl('retirement-401k-i', state.retirement);
       syncEl('sf-rent-r', state.sfRent); syncEl('sf-rent-i', state.sfRent);
       syncEl('sf-car-r', state.sfCar); syncEl('sf-car-i', state.sfCar);
       syncEl('years-selling-r', state.yearsSelling); syncEl('years-selling-i', state.yearsSelling);
@@ -2013,9 +2013,9 @@ function loadScenario(input) {
       const targetYearEl = document.getElementById('target-year');
       if (targetYearEl) targetYearEl.value = state.targetYear || 2027;
       // Boat selection
-      if (state.boatSelection) {
+      if (state.boat) {
         document.querySelectorAll('.boat-btn').forEach(b => {
-          b.classList.toggle('on', b.dataset.boat === state.boatSelection);
+          b.classList.toggle('on', b.dataset.boat === state.boat);
         });
       }
       // Payment method tabs
@@ -2024,7 +2024,7 @@ function loadScenario(input) {
         if (method) b.classList.toggle('on', method === state.paymentMethod);
       });
       // Lifestyle mode and region
-      document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === state.lifestyleMode));
+      document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === state.mode));
       document.querySelectorAll('[data-region]').forEach(b => b.classList.toggle('on', b.dataset.region === state.region));
       update();
       // Show confirmation
@@ -2067,8 +2067,8 @@ function exportScenario() {
     'pacific': 'Remote Pacific'
   };
 
-  const boatLabel = BOAT_LABELS[state.boatSelection] || 'Custom';
-  const modeLabel = MODE_LABELS[state.lifestyleMode] || state.lifestyleMode;
+  const boatLabel = BOAT_LABELS[state.boat] || 'Custom';
+  const modeLabel = MODE_LABELS[state.mode] || state.mode;
   const regionLabel = REGION_LABELS[state.region] || state.region;
   const financing = state.paymentMethod === 'finance';
 
@@ -2079,7 +2079,7 @@ function exportScenario() {
 - **Selection:** ${boatLabel}
 - **Purchase price:** $${state.boatPrice.toLocaleString()}
 - **All-in cost (with add-ons):** $${d.purchaseTotal.toLocaleString()}
-- **Payment method:** ${financing ? `Finance (${state.downPaymentPct}% down, ${state.loanInterestRate}% interest, ${state.loanTermYears}-year term)` : 'Pay cash'}
+- **Payment method:** ${financing ? `Finance (${state.downPaymentPct}% down, ${state.interestRate}% interest, ${state.loanTermYears}-year term)` : 'Pay cash'}
 ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTotal).toLocaleString()}
 - **Monthly loan payment:** $${d.monthlyLoanPayment.toLocaleString()}
 - **Total interest over loan term:** $${d.totalInterest.toLocaleString()}` : `- **Upfront (Day 1):** $${d.purchaseTotal.toLocaleString()}`}
@@ -2091,21 +2091,21 @@ ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTo
 - **Annual burn:** $${((d.monthlyTotal || 0) * 12).toLocaleString()}
 
 ## 💼 Income
-- **Annual gross income:** $${state.annualIncome.toLocaleString()}
+- **Annual gross income:** $${state.income.toLocaleString()}
 - **Recurring/retainer %:** ${state.recurringPct}%
-- **Recurring monthly income:** $${Math.round(state.annualIncome * state.recurringPct / 100 / 12).toLocaleString()}
-- **Project/variable monthly income:** $${Math.round(state.annualIncome * (100 - state.recurringPct) / 100 / 12).toLocaleString()}
-- **Top client concentration:** ${state.topClientPct}%
+- **Recurring monthly income:** $${Math.round(state.income * state.recurringPct / 100 / 12).toLocaleString()}
+- **Project/variable monthly income:** $${Math.round(state.income * (100 - state.recurringPct) / 100 / 12).toLocaleString()}
+- **Top client concentration:** ${state.concentrationPct}%
 - **Effective tax rate:** ${state.taxRate}%
 - **Gross income required to cruise:** $${(d.grossRequired || 0).toLocaleString()}
 
 ## 🏦 Balance Sheet
 - **Liquid savings:** $${(state.liquidSavings || 0).toLocaleString()}
-- **Taxable brokerage:** $${(state.brokerageSavings || 0).toLocaleString()}
-- **IRA / Roth IRA:** $${(state.iraSavings || 0).toLocaleString()} (net after penalties: $${Math.round((state.iraSavings || 0) * 0.675).toLocaleString()})
-- **401k / retirement (excluded):** $${(state.retirement401k || 0).toLocaleString()}
+- **Taxable brokerage:** $${(state.brokerage || 0).toLocaleString()}
+- **IRA / Roth IRA:** $${(state.ira || 0).toLocaleString()} (net after penalties: $${Math.round((state.ira || 0) * 0.675).toLocaleString()})
+- **401k / retirement (excluded):** $${(state.retirement || 0).toLocaleString()}
 - **Available for purchase:** $${d.availableForPurchase.toLocaleString()}
-- **Monthly savings rate:** $${state.monthlySavingsRate.toLocaleString()}
+- **Monthly savings rate:** $${state.rate.toLocaleString()}
 
 ## 🎯 Readiness
 - **Savings target:** $${(d.target || 0).toLocaleString()}
@@ -2114,8 +2114,8 @@ ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTo
 - **Target ready date:** ${d.months === 0 ? 'Now' : d.months === Infinity ? 'Unknown' : (() => { const t = new Date(2026, 1, 1); t.setMonth(t.getMonth() + d.months); return t.toLocaleDateString('en-US', {month:'long', year:'numeric'}); })()}
 
 ## 📊 Key Signals
-- **Recurring income covers cruising budget:** ${Math.round(state.annualIncome * state.recurringPct / 100 / 12) >= d.monthlyTotal ? '✅ Yes' : '❌ No'}
-- **Client concentration risk:** ${state.topClientPct < 40 ? '✅ Well diversified' : state.topClientPct < 60 ? '⚠️ Moderate' : '❌ High risk'}
+- **Recurring income covers cruising budget:** ${Math.round(state.income * state.recurringPct / 100 / 12) >= d.monthlyTotal ? '✅ Yes' : '❌ No'}
+- **Client concentration risk:** ${state.concentrationPct < 40 ? '✅ Well diversified' : state.concentrationPct < 60 ? '⚠️ Moderate' : '❌ High risk'}
 - **50% income drop runway:** ${Math.round((d.availableForPurchase) / (d.monthlyTotal / 2))} months
 
 ---
