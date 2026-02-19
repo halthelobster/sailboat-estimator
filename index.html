@@ -1400,7 +1400,7 @@ function bindSlider(rangeId, inputId, stateKey, min, max) {
   const i = document.getElementById(inputId);
   r.addEventListener('input', () => {
     state[stateKey] = parseInt(r.value);
-    if (stateKey === 'recurringPct') {
+    if (stateKey === 'recurringPct' || stateKey === 'taxRate') {
       i.textContent = state[stateKey] + '%';
     } else {
       i.value = fmtFull(state[stateKey]);
