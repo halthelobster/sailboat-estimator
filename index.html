@@ -496,29 +496,30 @@ const BOATS = {
 };
 
 // Jordan's actual lifestyle modes from the planner, not generic budget/comfortable/luxury
+// maintenance and insurance are calculated from boat value, not fixed amounts
 const MODES = {
   marina: {
     name: '🏙️ Marina Base',
     desc: 'Docked, full amenities',
-    maintenance: 600, marinas: 1500, food: 1200, fuel: 150,
+    marinas: 1500, food: 1200, fuel: 150,
     bonnie: 250, starlink: 165, health: 400, travel: 200, misc: 300
   },
   anchor: {
     name: '⚓ Anchor Base', 
     desc: 'Anchored long-term, occasional marina',
-    maintenance: 500, marinas: 300, food: 1000, fuel: 100,
+    marinas: 300, food: 1000, fuel: 100,
     bonnie: 250, starlink: 165, health: 400, travel: 200, misc: 250
   },
   coastal: {
     name: '🌊 Coastal Cruising',
     desc: 'Day hops, marinas 1-2x/week', 
-    maintenance: 650, marinas: 700, food: 1300, fuel: 200,
+    marinas: 700, food: 1300, fuel: 200,
     bonnie: 250, starlink: 165, health: 400, travel: 300, misc: 350
   },
   bluewater: {
     name: '🌍 Blue Water Passage',
     desc: 'Ocean crossings',
-    maintenance: 800, marinas: 400, food: 1400, fuel: 300,
+    marinas: 400, food: 1400, fuel: 300,
     bonnie: 250, starlink: 165, health: 400, travel: 400, misc: 400
   }
 };
@@ -528,10 +529,13 @@ const MULTS = { 'se-asia':0.6, med:0.85, caribbean:1.15, us:1.75, pacific:1.25 }
 const REGION_LBL = { 'se-asia':'SE Asia', med:'Mediterranean', caribbean:'Caribbean', us:'US/EU Coasts', pacific:'Pacific' };
 
 // Fixed costs that don't vary by region (Jordan's specific items)
+// maintenance and insurance are calculated from boat value, not in this set
 const FIXED_CATS = new Set(['bonnie','starlink','health','travel']);
 
 const CAT_LBL = {
-  maintenance:'Boat maintenance', marinas:'Marinas/moorings',
+  maintenance:'Boat maintenance (4% of boat value annually)', 
+  insurance:'Insurance (2% of boat value annually)',
+  marinas:'Marinas/moorings',
   food:'Food & dining', fuel:'Fuel',
   bonnie:'Bonnie (dog) — vet, health certs, food', 
   starlink:'Starlink — $165/mo default',
@@ -570,11 +574,28 @@ function compute() {
 
   const mode = MODES[state.mode];
   const mult = MULTS[state.region];
+  const isCatamaran = state.boat === 'leopard40';
+  
   const monthly = {};
+  
+  // Calculate maintenance and insurance from boat value
+  monthly.maintenance = Math.round((state.boatPrice * 0.04) / 12);
+  monthly.insurance = Math.round((state.boatPrice * 0.02) / 12);
+  
+  // Calculate other categories from mode base values
   for (const [k,v] of Object.entries(mode)) {
     if (k === 'name' || k === 'desc') continue;
-    monthly[k] = FIXED_CATS.has(k) ? v : Math.round(v * mult);
+    let cost = FIXED_CATS.has(k) ? v : Math.round(v * mult);
+    
+    // Apply catamaran premiums
+    if (isCatamaran) {
+      if (k === 'marinas') cost = Math.round(cost * 1.5); // 50% premium for beam charges
+      if (k === 'fuel') cost = Math.round(cost * 1.3);    // 30% premium for two engines
+    }
+    
+    monthly[k] = cost;
   }
+  
   const monthlyTotal = Object.values(monthly).reduce((s,v)=>s+v, 0);
   const annualBudget = monthlyTotal * 12;
 
@@ -686,10 +707,28 @@ function update() {
   // Purchase
   document.getElementById('purchase-total').textContent = fmtFull(d.purchaseTotal);
 
-  // Budget rows
-  document.getElementById('budget-rows').innerHTML = Object.entries(d.monthly).map(([k,v]) =>
-    `<div class="brow"><span class="bc">${CAT_LBL[k]}</span><span class="ba">${fmtFull(v)}</span></div>`
-  ).join('');
+  // Budget rows with special handling for calculated values
+  const budgetRowsHtml = Object.entries(d.monthly).map(([k,v]) => {
+    let label = CAT_LBL[k];
+    let amount = fmtFull(v);
+    
+    // Show calculation for maintenance and insurance
+    if (k === 'maintenance') {
+      amount = `${fmtFull(v)} <span style="font-size:10px;color:var(--muted)">(${fmtFull(state.boatPrice)} × 4% ÷ 12)</span>`;
+    } else if (k === 'insurance') {
+      amount = `${fmtFull(v)} <span style="font-size:10px;color:var(--muted)">(${fmtFull(state.boatPrice)} × 2% ÷ 12)</span>`;
+    }
+    
+    // Show catamaran premium indicator
+    if (state.boat === 'leopard40' && (k === 'marinas' || k === 'fuel')) {
+      const premium = k === 'marinas' ? '+50%' : '+30%';
+      amount = `${fmtFull(v)} <span style="font-size:10px;color:var(--amber)">(cat ${premium})</span>`;
+    }
+    
+    return `<div class="brow"><span class="bc">${label}</span><span class="ba">${amount}</span></div>`;
+  }).join('');
+  
+  document.getElementById('budget-rows').innerHTML = budgetRowsHtml;
   document.getElementById('monthly-total').textContent = fmtFull(d.monthlyTotal);
   document.getElementById('annual-total').textContent = fmtFull(d.annualBudget);
 
