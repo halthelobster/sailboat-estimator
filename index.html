@@ -1899,8 +1899,8 @@ ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTo
 ## 🌊 Lifestyle
 - **Mode:** ${modeLabel}
 - **Primary region:** ${regionLabel}
-- **Monthly burn:** $${d.monthlyTotal.toLocaleString()}
-- **Annual burn:** $${(d.monthlyTotal * 12).toLocaleString()}
+- **Monthly burn:** $${(d.monthlyTotal || 0).toLocaleString()}
+- **Annual burn:** $${((d.monthlyTotal || 0) * 12).toLocaleString()}
 
 ## 💼 Income
 - **Annual gross income:** $${state.annualIncome.toLocaleString()}
@@ -1909,7 +1909,7 @@ ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTo
 - **Project/variable monthly income:** $${Math.round(state.annualIncome * (100 - state.recurringPct) / 100 / 12).toLocaleString()}
 - **Top client concentration:** ${state.topClientPct}%
 - **Effective tax rate:** ${state.taxRate}%
-- **Gross income required to cruise:** $${d.grossIncomeRequired.toLocaleString()}
+- **Gross income required to cruise:** $${(d.grossRequired || 0).toLocaleString()}
 
 ## 🏦 Balance Sheet
 - **Liquid savings:** $${(state.liquidSavings || 0).toLocaleString()}
@@ -1920,8 +1920,8 @@ ${financing ? `- **Down payment (Day 1 upfront):** $${(d.downPayment + d.addonTo
 - **Monthly savings rate:** $${state.monthlySavingsRate.toLocaleString()}
 
 ## 🎯 Readiness
-- **Savings target:** $${d.savingsTarget.toLocaleString()}
-- **Savings gap:** $${Math.max(0, d.savingsTarget - d.availableForPurchase).toLocaleString()}
+- **Savings target:** $${(d.target || 0).toLocaleString()}
+- **Savings gap:** $${Math.max(0, (d.target || 0) - (d.availableForPurchase || 0)).toLocaleString()}
 - **Months to financially ready:** ${d.months === 0 ? 'Ready now' : d.months === Infinity ? 'Need savings rate' : d.months + ' months'}
 - **Target ready date:** ${d.months === 0 ? 'Now' : d.months === Infinity ? 'Unknown' : (() => { const t = new Date(2026, 1, 1); t.setMonth(t.getMonth() + d.months); return t.toLocaleDateString('en-US', {month:'long', year:'numeric'}); })()}
 
